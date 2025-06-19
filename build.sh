@@ -1,1 +1,4 @@
-echo "Test script start!"
+#!/bin/bash
+set -e
+
+make
