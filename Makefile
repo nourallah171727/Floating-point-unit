@@ -1,6 +1,8 @@
 # Source files
 C_SRCS = src/main.c
 CPP_SRCS = src/modules.cpp
+# As modules.hpp and structs.h are included in main.c and modules.cpp
+# they will also be automatically compiled
 
 # Object files derived from source files
 C_OBJS = $(C_SRCS:.c=.o)
