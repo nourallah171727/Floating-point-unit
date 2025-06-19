@@ -6,12 +6,12 @@ struct Request {
   uint8_t op;
 };
  struct Result {
- uint32 t cycles ;
- uint32 t signs ;
- uint32 t overflows ;
- uint32 t underflows ;
- uint32 t inextacts ;
- uint32 t nans;
+ uint32_t cycles ;
+ uint32_t signs ;
+ uint32_t overflows ;
+ uint32_t underflows ;
+ uint32_t inextacts ;
+ uint32_t nans;
  };
 
 extern "C" int run_simulation();
