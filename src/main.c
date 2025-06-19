@@ -1,4 +1,9 @@
 #include <stdio.h> 
+#include <stdlib.h>
+
+extern int run_simulation();
+
+
 #include "../include/modules.hpp"
 int main() {
     printf("%d",run_simulation());
