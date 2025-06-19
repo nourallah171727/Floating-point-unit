@@ -1,11 +1,12 @@
 #include <stdio.h> 
 #include <stdlib.h>
+#include "../include/structs.h"
 
-extern int run_simulation();
+extern struct Result run_simulation();
 
-
-#include "../include/modules.hpp"
 int main() {
-    printf("%d",run_simulation());
+
+	struct Result r = run_simulation();
+
     return 0;
 }

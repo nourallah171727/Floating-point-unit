@@ -1,8 +1,11 @@
 #include <systemc>
 #include "../include/modules.hpp"
+#include "../include/structs.h"
 
-extern "C" int run_simulation() {
-    return 4;
+extern "C" struct Result run_simulation() {
+	struct Result result;
+
+    return result;
 }
 
 // Note that we need this default sc_main implementation.
