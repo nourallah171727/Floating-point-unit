@@ -1,8 +1,10 @@
 #include <systemc>
 #include "../include/modules.hpp"
-#include "../include/structs.h"
 
-extern "C" struct Result run_simulation() {
+extern "C" struct Result run_simulation(uint32_t cycles,const char* tracefile,
+								 uint8_t sizeExponent,uint8_t sizeMantissa,uint8_t roundMode,
+								 uint32_t numRequests,struct Request* requests){
+
 	struct Result result;
 
     return result;

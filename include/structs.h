@@ -13,3 +13,19 @@ struct Result {
     uint32_t inexactes;
     uint32_t nans;
 };
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+struct Result run_simulation(uint32_t cycles,
+                            const char* tracefile,
+                            uint8_t sizeExponent,
+                            uint8_t sizeMantissa,
+                            uint8_t roundMode,
+                            uint32_t numRequests,
+                            struct Request* requests);
+
+#ifdef __cplusplus
+}
+#endif

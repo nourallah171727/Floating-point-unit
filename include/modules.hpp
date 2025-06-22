@@ -1,6 +1,7 @@
 #include <systemc>
+#include <structs.h>
 
 using namespace sc_core;
 
-extern "C" struct Result run_simulation();
+//TODO: SYSTEMC Modules
 
