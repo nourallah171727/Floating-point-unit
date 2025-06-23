@@ -15,7 +15,8 @@
         {
             "name": "d",
             "includePath": [
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/**",
+                "/Users/nourallahgargouri/makefileinstallation/systemc/include"
             ],
             "defines": [
                 "_DEBUG",
