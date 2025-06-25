@@ -1,17 +1,17 @@
-#include "../include/AddSub.hpp"
+#include "../include/Adder.hpp"
 #include <systemc>
 #include <cstdint>
 using namespace sc_core;
 using namespace sc_dt;
 
-AddSub::AddSub(sc_module_name name, uint32_t e_bits, uint32_t m_bits)
+Adder::Adder(sc_module_name name, uint32_t e_bits, uint32_t m_bits)
     : sc_module(name), exponent_bits(e_bits), mantissa_bits(m_bits)
 {
     SC_METHOD(exec);
     sensitive << r1 << r2;
 }
 
-void AddSub::exec()
+void Adder::exec()
 {
     overflow.write(false);
     underflow.write(false);
@@ -20,7 +20,7 @@ void AddSub::exec()
     extract();
     add();
 }
-void AddSub::extract()
+void Adder::extract()
 {
     sign_r1 = r1.read() >> 31;
     sign_r2 = r2.read() >> 31;
@@ -31,7 +31,7 @@ void AddSub::extract()
     mantissa_r1 = (mantissa_bits == 0) ? 0 : (r1.read() << (32 - mantissa_bits)) >> (32 - mantissa_bits);
     mantissa_r2 = (mantissa_bits == 0) ? 0 : (r2.read() << (32 - mantissa_bits)) >> (32 - mantissa_bits);
 }
-void AddSub::add()
+void Adder::add()
 {
     uint32_t nan_constant = (((1 << exponent_bits) - 1) << mantissa_bits) + 1;
     uint32_t positive_inf_constant = ((1 << exponent_bits) - 1) << mantissa_bits;
@@ -220,7 +220,7 @@ void AddSub::add()
         ro.write((res_sign << 31) | (res_exp << mantissa_bits) | (subbed_mantissas));
     }
 }
-bool AddSub::is_nan(uint32_t exponent_value, uint32_t exponent_bits, uint32_t mantissa)
+bool Adder::is_nan(uint32_t exponent_value, uint32_t exponent_bits, uint32_t mantissa)
 {
     if (exponent_value == ((exponent_bits == 32)
                                ? std::numeric_limits<uint32_t>::max()
@@ -230,7 +230,7 @@ bool AddSub::is_nan(uint32_t exponent_value, uint32_t exponent_bits, uint32_t ma
     }
     return false;
 }
-bool AddSub::is_inf(uint32_t exponent_value, uint32_t exponent_bits, uint32_t mantissa)
+bool Adder::is_inf(uint32_t exponent_value, uint32_t exponent_bits, uint32_t mantissa)
 {
     if (exponent_value == ((exponent_bits == 32)
                                ? std::numeric_limits<uint32_t>::max()

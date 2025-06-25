@@ -2,7 +2,7 @@
 #include <cstdint>
 using namespace sc_core;
 using namespace sc_dt;
-SC_MODULE(AddSub)
+SC_MODULE(Adder)
 {
     sc_in<uint32_t> r1;
     sc_in<uint32_t> r2;
@@ -21,10 +21,10 @@ SC_MODULE(AddSub)
     uint32_t sign_r1;
     uint32_t sign_r2;
 
-    SC_HAS_PROCESS(AddSub);
-    AddSub(sc_core::sc_module_name name,
-           uint32_t exp_bits,
-           uint32_t man_bits);
+    SC_HAS_PROCESS(Adder);
+    Adder(sc_core::sc_module_name name,
+          uint32_t exp_bits,
+          uint32_t man_bits);
     void exec();
     void extract();
     void add();
