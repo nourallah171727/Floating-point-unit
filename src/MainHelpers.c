@@ -76,22 +76,25 @@ struct Request parse_csv_line(char* line) {
     char* lookahead = strtok(temp_line, ",");
     if (!lookahead) goto format_error;
     uint8_t op = (uint8_t)strtoul(lookahead, NULL, 10); // extracting op as int in a copy line to check later for number of commas 
+    if (op != 8 && op != 9 && op != 10 && op != 13 && op != 14 && op != 15) {
+        fprintf(stderr, "Unsupported opcode: %d\n", op);
+        exit(1);
+    }
     int comma_count = 0;
     for (char* c = line; *c; c++) {
         if (*c == ',') comma_count++;
     } // counting ',' 
-    if ((op == 15 && comma_count != 3) || (op != 15 && comma_count != 2)) {
-        fprintf(stderr, "Malformed CSV line (wrong number of fields for op=%d): %s\n", op, line);
-        exit(1); // deciding wether it is FMA or not
+    if (op == 15 && comma_count < 3) {
+        fprintf(stderr, "Malformed CSV line (FMA must have at least 4 fields): %s\n", line);
+        exit(1);
+    }
+    if (op != 15 && comma_count < 2) {
+        fprintf(stderr, "Malformed CSV line (expected at least op,r1,r2): %s\n", line);
+        exit(1);
     }
     char* field = strtok(line, ","); 
     if (!field) goto format_error;
     request.op = (uint8_t)strtoul(field, NULL, 10);  // parse op as decimal int
-    if (request.op != 8 && request.op != 9 && request.op != 10 &&
-        request.op != 13 && request.op != 14 && request.op != 15) {
-        fprintf(stderr, "Unsupported opcode: %d\n", request.op);
-        exit(1);
-    }
     field = strtok(NULL, ",");
     if (!field) goto format_error;
     request.r1 = parse_operand(field);  
