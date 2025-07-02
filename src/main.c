@@ -1,4 +1,4 @@
-#include <stdio.h> 
+#include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
@@ -16,7 +16,6 @@ int main(int argc, char* argv[]){
 	}
 
 	//initialising the main program's variables:
-	struct Result r;
 	struct Request* requests;
 
 	uint32_t cycles, sizeExponent, sizeMantissa, roundMode;
@@ -82,15 +81,15 @@ int main(int argc, char* argv[]){
 	printf("inputs: %d %d %d %d %s\n", cycles, sizeExponent, sizeMantissa, roundMode, tracefile);
 
 	//TODO: extract Requests from .csv file + num Requests
-	requests = load_csv_requests(filename, &numRequests);
+	//requests = load_csv_requests(filename, &numRequests);
 
 	//TODO: call run_simulation with all the inputs..
 	struct Result r = run_simulation(
 		cycles, tracefile, sizeExponent, sizeMantissa,
 		roundMode, numRequests, requests );
-	printf("Simulation results:\n");
-    printf("Cycles: %u\nSigns: %u\nOverflows: %u\nUnderflows: %u\nInexact: %u\nNaNs: %u\n",
-       r.cycles, r.signs, r.overflows, r.underflows, r.inexactes, r.nans);
+	//printf("Simulation results:\n");
+    //printf("Cycles: %u\nSigns: %u\nOverflows: %u\nUnderflows: %u\nInexact: %u\nNaNs: %u\n",
+      // r.cycles, r.signs, r.overflows, r.underflows, r.inexactes, r.nans);
 
 
     return 0;

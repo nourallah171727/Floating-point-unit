@@ -39,13 +39,14 @@ void printHelp(){
     printf("--help, --tf, --cycles, --size-exponent, --size-mantissa, --round-mode\n");
     printf("This program will be terminated...\n");
 }
+
 uint32_t parse_operand(const char* str){
     if ( str == NULL || strlen(str)==0){
         return 0; // but only for r3 when uneeded
     }
     if (strlen(str)>2 && str[0]=='0' && (str[1]=='x' || str[1] == 'X')) { // hexa 
         char* endptr; 
-        errno = 0; 
+        errno = 0;
         uint32_t value = strtoul(str, &endptr, 16); // unsigned long for safety if inf then it will be treated by the other FPU modules 
         if (errno != 0 || *endptr != '\0') {
             fprintf(stderr, "Invalid hex operand: %s\n", str);
@@ -64,6 +65,7 @@ uint32_t parse_operand(const char* str){
     memcpy(&bits, &fval, sizeof(bits));
     return bits;
 }
+
 struct Request parse_csv_line(char* line) {
     struct Request request = {0};  
     if (line[0] == '\0' || strspn(line, " \t\n\r") == strlen(line)) {
@@ -111,7 +113,8 @@ struct Request parse_csv_line(char* line) {
 format_error:
     fprintf(stderr, "Malformed CSV line. Expected format: op,r1,r2,r3\n");
     exit(1);
-} 
+}
+
 struct Request* load_csv_requests(const char* filename, uint32_t* out_count) {
     FILE* file = fopen(filename, "r");  // open file
     if (!file) {

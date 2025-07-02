@@ -1,12 +1,12 @@
 # Source files
-C_SRCS = src/main.c
-CPP_SRCS = src/modules.cpp
+C_SRCS   := $(wildcard src/*.c)
+CPP_SRCS := $(wildcard src/*.cpp)
 # As modules.hpp and structs.h are included in main.c and modules.cpp
 # they will also be automatically compiled
 
 # Object files derived from source files
-C_OBJS = $(C_SRCS:.c=.o)
-CPP_OBJS = $(CPP_SRCS:.cpp=.o)
+C_OBJS   := $(C_SRCS:.c=.o)
+CPP_OBJS := $(CPP_SRCS:.cpp=.o)
 
 # Final executable name
 TARGET = project

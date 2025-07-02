@@ -1,7 +1,9 @@
 #include <systemc>
 #include <cstdint>
+
 using namespace sc_core;
 using namespace sc_dt;
+
 SC_MODULE(AddSub)
 {
     sc_in<uint32_t> r1;
