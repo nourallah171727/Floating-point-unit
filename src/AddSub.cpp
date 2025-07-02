@@ -410,10 +410,15 @@ bool AddSub::increase_mantissa_by_one(uint32_t &mantissa, uint32_t &exp, uint32_
     }
     return false;
 }
-// deccreases mantissa by one , true when underflow is already handled
+// deccreases mantissa by one , true when result already handled
 bool AddSub::decrease_mantissa_by_one(uint32_t &mantissa, uint32_t &exp)
 {
     mantissa--;
+    // this tells caller program to write(0) , this should not represent an underflow case
+    if (mantissa == 0)
+    {
+        return true;
+    }
     if (mantissa >> mantissa_bits != 1)
     {
         if (exp == 0)
