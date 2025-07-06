@@ -40,25 +40,30 @@ void printHelp(){
     printf("This program will be terminated...\n");
 }
 
-uint32_t parse_operand(const char* str){
-    if ( str == NULL || strlen(str)==0){
-        return 0; // but only for r3 when uneeded
+uint32_t parse_operand(const char* str) {
+    if (str == NULL || strlen(str) == 0) {
+        return 0;
     }
-    if (strlen(str)>2 && str[0]=='0' && (str[1]=='x' || str[1] == 'X')) { // hexa 
-        char* endptr; 
-        errno = 0;
-        uint32_t value = strtoul(str, &endptr, 16); // unsigned long for safety if inf then it will be treated by the other FPU modules 
-        if (errno != 0 || *endptr != '\0') {
-            fprintf(stderr, "Invalid hex operand: %s\n", str);
+    char clean[64];
+    strncpy(clean, str, sizeof(clean) - 1);
+    clean[sizeof(clean) - 1] = '\0';
+    int len = strlen(clean);
+    if (len > 0 && (clean[len - 1] == '\n' || clean[len - 1] == '\r')) {
+        clean[len - 1] = '\0';
+    }
+    if (strncmp(clean, "0x", 2) == 0 || strncmp(clean, "0X", 2) == 0) {
+        char* endptr;
+        uint32_t value = strtoul(clean, &endptr, 16);
+        if (*endptr != '\0') {
+            fprintf(stderr, "Invalid hex operand: %s\n", clean);
             exit(1);
         }
         return value;
     }
     char* endptr;
-    errno = 0;
-    float fval = strtof(str, &endptr);
-    if (errno != 0 || endptr == str || *endptr != '\0') {
-        fprintf(stderr, "Invalid float operand: %s\n", str);
+    float fval = strtof(clean, &endptr);
+    if (*endptr != '\0') {
+        fprintf(stderr, "Invalid float operand: %s\n", clean);
         exit(1);
     }
     uint32_t bits;
@@ -116,6 +121,7 @@ format_error:
 }
 
 struct Request* load_csv_requests(const char* filename, uint32_t* out_count) {
+    printf("Trying to open: %s\n", filename); // for debug 
     FILE* file = fopen(filename, "r");  // open file
     if (!file) {
         perror("Error opening CSV file"); // throw error 
@@ -130,12 +136,12 @@ struct Request* load_csv_requests(const char* filename, uint32_t* out_count) {
     int is_first_line = 1;
 
     while (fgets(line, sizeof(line), file)) {
-        if (is_first_line) {
+        if (is_first_line) { 
             is_first_line = 0;
-            if (strncmp(line, "op,r1,r2,r3", 12) != 0 && strncmp(line, "op,r1,r2,r3\n", 13) != 0) {
-                fprintf(stderr, "Missing or invalid CSV header. Expected: op,r1,r2,r3\n");
-                exit(1); // first line as it shoud be 
-            }
+            if (strncmp(line, "op,r1,r2,r3", strlen("op,r1,r2,r3")) != 0) {
+               fprintf(stderr, "Missing or invalid CSV header. Expected: op,r1,r2,r3\n");
+               exit(1);
+               }
             continue;
         }
 
