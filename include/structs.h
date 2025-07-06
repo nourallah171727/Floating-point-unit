@@ -1,3 +1,6 @@
+#ifndef STRUCTS_H
+#define STRUCTS_H
+
 #include <stdint.h>
 
 struct Request {
@@ -29,3 +32,6 @@ struct Result run_simulation(uint32_t cycles,
 #ifdef __cplusplus
 }
 #endif
+
+#endif
+

@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include <string.h>
 #include <errno.h>
+#include "../include/structs.h"
+#include "../include/MainHelpers.h"
 
 
 //convert args to uints:

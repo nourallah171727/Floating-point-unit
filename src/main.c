@@ -5,8 +5,7 @@
 #include <errno.h>
 #include <getopt.h>
 
-#include "../include/structs.h"
-#include "MainHelpers.c"
+#include "../include/MainHelpers.h"
 
 int main(int argc, char* argv[]){
 
@@ -78,15 +77,15 @@ int main(int argc, char* argv[]){
 	}
 
 	//Debug
-	printf("inputs: %d %d %d %d %s\n", cycles, sizeExponent, sizeMantissa, roundMode, tracefile);
+	//printf("inputs: %d %d %d %d %s\n", cycles, sizeExponent, sizeMantissa, roundMode, tracefile);
 
 	//TODO: extract Requests from .csv file + num Requests
-	//requests = load_csv_requests(filename, &numRequests);
+	requests = load_csv_requests(filename, &numRequests);
 
 	//TODO: call run_simulation with all the inputs..
 	struct Result r = run_simulation(
 		cycles, tracefile, sizeExponent, sizeMantissa,
-		roundMode, numRequests, requests );
+		roundMode, numRequests, requests);
 	//printf("Simulation results:\n");
     //printf("Cycles: %u\nSigns: %u\nOverflows: %u\nUnderflows: %u\nInexact: %u\nNaNs: %u\n",
       // r.cycles, r.signs, r.overflows, r.underflows, r.inexactes, r.nans);

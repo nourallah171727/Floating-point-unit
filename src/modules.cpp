@@ -6,6 +6,8 @@ extern "C" struct Result run_simulation(uint32_t cycles, const char *tracefile,
                                         uint32_t numRequests, struct Request *requests)
 {
     Result result;
+	Request re1 = requests[0];
+	std::cout<< re1.r1<<" "<<re1.r2<<" "<<re1.r3<<" "<<re1.op<<std::endl;
     return result;
 }
 
