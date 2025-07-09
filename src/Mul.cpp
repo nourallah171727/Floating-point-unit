@@ -8,19 +8,16 @@ Mul::Mul(sc_module_name name,uint32_t mantissa_bitsp,uint32_t exponent_bitsp,uin
     :sc_module(name),mantissa_bits(mantissa_bitsp),exponent_bits(exponent_bitsp),round_mode(round_modep)
 {
     bias =(1<<(exponent_bits-1))-1;
-    SC_THREAD(run);
-    sensitive << clk.pos();
+    SC_METHOD(run);
+	sensitive<< r1 << r2;
 }
 
 void Mul::run(){
     //RUN the Module
-    while(true){
-        wait();
-        extract();
-        if(!handleSpecialCases()){
-            multiply();
-        }
-    }
+     extract();
+     if(!handleSpecialCases()){
+        multiply();
+     }
 }
 
 
