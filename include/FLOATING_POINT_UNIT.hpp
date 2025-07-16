@@ -1,9 +1,12 @@
 #include <systemc>
+#include <systemc.h>
+#include <stdint.h>
 #include <structs.h>
 #include "../include/AddSub.hpp"
 #include "../include/Mul.hpp"
 #include "../include/Max.hpp"
 #include "../include/Min.hpp"
+
 
 using namespace sc_core;
 
@@ -23,15 +26,18 @@ SC_MODULE(FLOATING_POINT_UNIT){
 
     SC_HAS_PROCESS(FLOATING_POINT_UNIT);
     FLOATING_POINT_UNIT(sc_module_name name, uint32_t e_bits, uint32_t m_bits, uint32_t roption)
-    : sc_module(name), exponent_bits(e_bits), mantissa_bits(m_bits), round_mode(roption))
+    : sc_module(name), exponent_bits(e_bits), mantissa_bits(m_bits), round_mode(roption){
 
         sensitive << clk.pos();
         SC_METHOD(exec);
-
     }
 
+
+
+    
+
     void exec(){
-        switch(op.to_uint()){
+        switch(op.read().to_uint()){
             case 8:
 
                 break;
@@ -48,6 +54,4 @@ SC_MODULE(FLOATING_POINT_UNIT){
         }
     }
 
-
-
-}
+};

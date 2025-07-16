@@ -12,7 +12,7 @@ extern "C" struct Result run_simulation(uint32_t cycles, const char *tracefile,
     //input signals
     sc_signal<uint32_t> r1,r2,r3;
     sc_signal<sc_bv<4>> op;
-    sc_clk clk("clk",1,SC_SEC);
+    sc_clock clk("clk",1,SC_SEC);
 
     //output signals
     sc_signal<uint32_t> ro;
@@ -39,7 +39,7 @@ extern "C" struct Result run_simulation(uint32_t cycles, const char *tracefile,
     uint32_t signs=0;
     uint32_t overflows=0;
     uint32_t underflows=0;
-    uint32_t inexactes=0;
+    uint32_t inexacts=0;
     uint32_t nans=0;
 
 
@@ -79,7 +79,7 @@ extern "C" struct Result run_simulation(uint32_t cycles, const char *tracefile,
     result.signs=signs;
     result.overflows=overflows;
     result.underflows=underflows;
-    result.inexactes=inexactes;
+    result.inexacts=inexacts;
     result.nans=nan;
 
     return result;
