@@ -33,25 +33,13 @@ void Mul::multiply(){
     uint32_t stored_e1 =exp1, stored_e2=exp2;
     int32_t e1, e2;//Actual exp
     uint64_t m1=0, m2=0;
-        
-    if(stored_e1==0){
-        // subnormal: no implicit one, exponent = 1-bias-mantissa_bits
-        e1= 1-bias-static_cast<int32_t>(mantissa_bits);
-        m1= mantissa1;
-    }else{
-        e1= static_cast<int32_t>(stored_e1)-bias;
-        m1= (1ULL << mantissa_bits) | mantissa1;
-    }
 
-    if(stored_e2==0){
-        e2= 1-bias-static_cast<int32_t>(mantissa_bits);
-        m2= mantissa2;
-    }else{
-        e2= static_cast<int32_t>(stored_e2)-bias;
-        m2= (1ULL << mantissa_bits)|mantissa2;
-    }
+	e1= static_cast<int32_t>(stored_e1)-bias;
+    m1= (1ULL << mantissa_bits) | mantissa1;
+    e2= static_cast<int32_t>(stored_e2)-bias;
+    m2= (1ULL << mantissa_bits)|mantissa2;
 
-    //2.Multiply + round (may adjust e1, e2)
+	//2.Multiply + round (may adjust e1, e2)
     uint32_t mantissa_result=  multiply_and_round(m1,m2,e1,e2,is_exact);
 
     //3.Recompute biased exponent
@@ -72,35 +60,21 @@ void Mul::multiply(){
         underflow.write(false);
         inexact.write(!is_exact);
         nan.write(false);
-        return;
+        sign.write(signr);
+
+		return;
     }
 
-    //4.2 Underflow to subnormal or zero (Honestly I got some Help from AI)
-    if(final_exp<=0){
-        int shift = 1-final_exp;
-
-        // start from rounded significand (implicit 1 + frac)
-        uint64_t full_sig = ((1ULL << mantissa_bits) | mantissa_result);
-        bool sticky = false;
-
-        if(shift <= static_cast<int>(mantissa_bits)+1){
-            uint64_t mask =(1ULL << shift)-1;
-            sticky = (full_sig & mask) != 0;
-            full_sig >>= shift;
-        }else{
-            sticky = (full_sig != 0);
-            full_sig = 0;
-        }
-
-        uint32_t sub_mant = static_cast<uint32_t>(full_sig) & ((1U << mantissa_bits) - 1);
-        uint32_t ans = (signr << 31) | sub_mant;
-
-        ro.write(ans);
-        zero.write(sub_mant==0);
-        overflow.write(false);
+    //4.2 Underflow to subnormal or zero
+    if(final_exp<0){
+		ro.write(0);
+        zero.write(1);
+		overflow.write(false);
         underflow.write(true);
-        inexact.write(!is_exact || sticky);
+        inexact.write(true);
         nan.write(false);
+        sign.write(signr);
+
         return;
     }
 
@@ -114,6 +88,8 @@ void Mul::multiply(){
      underflow.write(false);
      inexact.write(!is_exact);
      nan.write(false);
+     sign.write(signr);
+
 }
 
 uint32_t Mul::multiply_and_round(uint64_t m1,uint64_t m2,int32_t &e1,int32_t &e2, bool &is_exact){
@@ -133,9 +109,9 @@ uint32_t Mul::multiply_and_round(uint64_t m1,uint64_t m2,int32_t &e1,int32_t &e2
     //2.3 ROUND the Result depending on the product of the mantisses
 
     //2.3.1 Extract low,guard and stikcy bits:
-    uint64_t low = (1ULL << drop) - 1;
+    uint64_t low = (1ULL << drop)-1;
     uint32_t guard = (product >> (drop-1)) & 1; //the bit just above the retained mantissa
-    uint32_t roundb= (product >> (drop-2)) & 1; //the next bit after guard
+    uint32_t roundb= (drop ==1) ? 0: (product >> (drop-2)) & 1; //the next bit after guard
     uint32_t sticky = ((product & (low>>2)) != 0) ? 1 : 0; //OR of all lower bits (indicates any non-zero bits were dropped)
 
     //2.3.2 Find if the result is exact,if not round depending on the round type
@@ -205,7 +181,7 @@ bool Mul::handleSpecialCases(){
             //Nan*0=0
             ro.write((signa^signb)<<31);
             zero.write(true);overflow.write(false);underflow.write(false);
-            inexact.write(false); nan.write(false);
+            inexact.write(false); nan.write(false);sign.write(false);
         }else writeNaN(); //Nan*a= Nan
         return true;
     }
@@ -216,7 +192,7 @@ bool Mul::handleSpecialCases(){
             uint32_t ans = ((signa^signb)<<31)|(((1U<<exponent_bits)-1)<<mantissa_bits);
             ro.write(ans);
             zero.write(false); overflow.write(true);
-            underflow.write(false); inexact.write(false); nan.write(false);
+            underflow.write(false); inexact.write(false); nan.write(false);sign.write((signa^signb));
         }
         return true;
     }
@@ -224,7 +200,7 @@ bool Mul::handleSpecialCases(){
         // a*0=0
         ro.write((signa^signb)<<31);
         zero.write(true); overflow.write(false);
-        underflow.write(false); inexact.write(false); nan.write(false);
+        underflow.write(false); inexact.write(false); nan.write(false); sign.write((signa^signb));
         return true;
     }
     return false;
@@ -235,5 +211,5 @@ void Mul::writeNaN(){
     uint32_t ans =(((1U<<exponent_bits)-1)<<mantissa_bits)|(1U<<(mantissa_bits-1));
     ro.write(ans);
     zero.write(false);overflow.write(false);underflow.write(false);
-    inexact.write(true);nan.write(true);
+    inexact.write(true);nan.write(true);sign.write((signa^signb));
 }
