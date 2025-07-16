@@ -8,7 +8,7 @@
 using namespace sc_core;
 
 // TODO: SYSTEMC Modules
-SC_MODULE(FLOATING_POINT_UNIT) {
+SC_MODULE(FLOATING_POINT_UNIT){
     sc_in<uint32_t> r1,r2,r3;
     sc_in<sc_bv<4>> op;
     sc_in<bool> clk;
