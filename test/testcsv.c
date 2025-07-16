@@ -5,19 +5,21 @@
 #include "../include/MainHelpers.h"
 
 int main() {
-    uint32_t count = 0;
-    struct Request* reqs = load_csv_requests("test/test.csv", &count);
+    uint32_t sizeExponent = 7;
+    uint32_t sizeMantissa = 24;
+    uint32_t roundMode = 2;
+    uint32_t cycles = 10;  // Max number of requests to simulate
 
-    
-    printf("Parsed %u requests:\n", count);
-    for (uint32_t i = 0; i < count; ++i) {
+    uint32_t totalRequests = 0;
+    struct Request* reqs = load_csv_requests("test/test.csv", sizeExponent, sizeMantissa, roundMode, &totalRequests, cycles);
+    printf("Total parsed requests: %u (showing up to %u)\n", totalRequests, cycles);
+    uint32_t displayed = (totalRequests < cycles) ? totalRequests : cycles;
+
+    for (uint32_t i = 0; i < displayed; ++i) {
         printf("Request %u => op=%u r1=0x%08x r2=0x%08x r3=0x%08x\n",
             i, reqs[i].op, reqs[i].r1, reqs[i].r2, reqs[i].r3);
     }
 
     free(reqs);
-    return 0; 
+    return 0;
 }
-//for testing : gcc -std=c17 -Iinclude -o testcsv test/testcsv.c src/MainHelpers.c -lm
-// ./testcsv
-
