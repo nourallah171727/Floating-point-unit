@@ -8,11 +8,11 @@ Mul::Mul(sc_module_name name,uint32_t mantissa_bitsp,uint32_t exponent_bitsp,uin
     :sc_module(name),mantissa_bits(mantissa_bitsp),exponent_bits(exponent_bitsp),round_mode(round_modep)
 {
     bias =(1<<(exponent_bits-1))-1;
-    SC_METHOD(run);
+    SC_METHOD(exec);
 	sensitive<< r1 << r2;
 }
 
-void Mul::run(){
+void Mul::exec(){
     //RUN the Module
      extract();
      if(!handleSpecialCases()){

@@ -27,7 +27,7 @@ SC_MODULE(Mul){
     Mul(sc_module_name name,uint32_t mantissa_bitsp,uint32_t exponent_bitsp,uint32_t round_modep);
 
     //Methods
-    void run();
+    void exec();
     void extract();
     void multiply();
     uint32_t multiply_and_round(uint64_t m1, uint64_t m2,int32_t &e1, int32_t &e2,bool &is_exact);

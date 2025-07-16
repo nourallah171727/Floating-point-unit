@@ -86,9 +86,10 @@ int main(int argc, char* argv[]){
 	struct Result r = run_simulation(
 		cycles, tracefile, sizeExponent, sizeMantissa,
 		roundMode, numRequests, requests);
-	//printf("Simulation results:\n");
-    //printf("Cycles: %u\nSigns: %u\nOverflows: %u\nUnderflows: %u\nInexact: %u\nNaNs: %u\n",
-      // r.cycles, r.signs, r.overflows, r.underflows, r.inexactes, r.nans);
+
+    printf("Simulation results:\n");
+    printf("Cycles: %u\nSigns: %u\nOverflows: %u\nUnderflows: %u\nInexact: %u\nNaNs: %u\n",
+       r.cycles, r.signs, r.overflows, r.underflows, r.inexactes, r.nans);
 
 
     return 0;
