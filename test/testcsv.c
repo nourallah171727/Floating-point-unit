@@ -1,11 +1,12 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include "../include/structs.h"
-#include "MainHelpers.c"
+#include "../include/MainHelpers.h"
 
 int main() {
     uint32_t count = 0;
-    struct Request* reqs = load_csv_requests("test.csv", &count);
+    struct Request* reqs = load_csv_requests("test/test.csv", &count);
 
     
     printf("Parsed %u requests:\n", count);
@@ -15,5 +16,8 @@ int main() {
     }
 
     free(reqs);
-    return 0;
+    return 0; 
 }
+//for testing : gcc -std=c17 -Iinclude -o testcsv test/testcsv.c src/MainHelpers.c -lm
+// ./testcsv
+

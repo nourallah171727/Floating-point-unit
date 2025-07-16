@@ -216,8 +216,25 @@ void AddSub::cont_sign_add()
         ro.write(0);
         return;
     }
+    if (!(guard == 0 && sticky == 0))
+    {
+        subbed_mantissas -= 1;
+        if (guard == 0 && sticky == 1)
+        {
+            guard = 1;
+        }
+        else if (guard == 1 && sticky == 1)
+        {
+            guard = 0;
+        }
+    }
     if (!round_mantissa(false, subbed_mantissas, res_exp, res_sign, guard, sticky))
     {
+        if (subbed_mantissas == 0)
+        {
+            ro.write(0);
+            return;
+        }
         // bring mantissa to scientific notation , since it can be 0. after substraction
         while (subbed_mantissas >> mantissa_bits != 1)
         {
@@ -282,21 +299,10 @@ bool AddSub::round_mantissa(bool add_same_sign, uint32_t &mantissa, uint32_t &ex
         if ((is_tie && lsb_is_odd) || more_than_half)
         {
 
-            if (add_same_sign)
+            if (increase_mantissa_by_one(mantissa, exp, sign))
             {
-                if (increase_mantissa_by_one(mantissa, exp, sign))
-                {
-                    ro.write(sign == 0 ? positive_inf_constant : negative_inf_constant);
-                    return true;
-                }
-            }
-            else
-            {
-                if (decrease_mantissa_by_one(mantissa, exp))
-                {
-                    ro.write(0);
-                    return true;
-                }
+                ro.write(sign == 0 ? positive_inf_constant : negative_inf_constant);
+                return true;
             }
         }
 
@@ -311,21 +317,10 @@ bool AddSub::round_mantissa(bool add_same_sign, uint32_t &mantissa, uint32_t &ex
         if (is_tie || more_than_half)
         {
 
-            if (add_same_sign)
+            if (increase_mantissa_by_one(mantissa, exp, sign))
             {
-                if (increase_mantissa_by_one(mantissa, exp, sign))
-                {
-                    ro.write(sign == 0 ? positive_inf_constant : negative_inf_constant);
-                    return true;
-                }
-            }
-            else if (more_than_half)
-            {
-                if (decrease_mantissa_by_one(mantissa, exp))
-                {
-                    ro.write(0);
-                    return true;
-                }
+                ro.write(sign == 0 ? positive_inf_constant : negative_inf_constant);
+                return true;
             }
         }
 
@@ -333,19 +328,12 @@ bool AddSub::round_mantissa(bool add_same_sign, uint32_t &mantissa, uint32_t &ex
     }
     case 2:
     {
-        if (!add_same_sign)
-        {
-            if (decrease_mantissa_by_one(mantissa, exp))
-            {
-                ro.write(0);
-                return true;
-            }
-        }
+
         break;
     }
     case 3:
     {
-        if (add_same_sign && sign == 0)
+        if (sign == 0)
         {
             if (increase_mantissa_by_one(mantissa, exp, sign))
             {
@@ -353,19 +341,12 @@ bool AddSub::round_mantissa(bool add_same_sign, uint32_t &mantissa, uint32_t &ex
                 return true;
             }
         }
-        else if (!add_same_sign && sign == 1)
-        {
-            if (decrease_mantissa_by_one(mantissa, exp))
-            {
-                ro.write(0);
-                return true;
-            }
-        }
+
         break;
     }
     case 4:
     {
-        if (add_same_sign && sign == 1)
+        if (sign == 1)
         {
             if (increase_mantissa_by_one(mantissa, exp, sign))
             {
@@ -373,14 +354,7 @@ bool AddSub::round_mantissa(bool add_same_sign, uint32_t &mantissa, uint32_t &ex
                 return true;
             }
         }
-        else if (!add_same_sign && sign == 0)
-        {
-            if (decrease_mantissa_by_one(mantissa, exp))
-            {
-                ro.write(0);
-                return true;
-            }
-        }
+
         break;
     }
     }
@@ -408,27 +382,5 @@ bool AddSub::increase_mantissa_by_one(uint32_t &mantissa, uint32_t &exp, uint32_
     {
         mantissa += 1;
     }
-    return false;
-}
-// deccreases mantissa by one , true when result already handled
-bool AddSub::decrease_mantissa_by_one(uint32_t &mantissa, uint32_t &exp)
-{
-    mantissa--;
-    // this tells caller program to write(0) , this should not represent an underflow case
-    if (mantissa == 0)
-    {
-        return true;
-    }
-    if (mantissa >> mantissa_bits != 1)
-    {
-        if (exp == 0)
-        {
-            underflow.write(true);
-            inexact.write(true);
-            return true;
-        }
-    }
-    mantissa <<= 1;
-    exp--;
     return false;
 }
