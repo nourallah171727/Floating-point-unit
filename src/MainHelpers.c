@@ -48,6 +48,7 @@ uint32_t parse_operand(const char* str) {
     }
     char clean[64];
     strncpy(clean, str, sizeof(clean) - 1);
+    clean[strcspn(clean, "\r\n")] = '\0';
     clean[sizeof(clean) - 1] = '\0';
     int len = strlen(clean);
     if (len > 0 && (clean[len - 1] == '\n' || clean[len - 1] == '\r')) {
