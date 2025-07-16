@@ -8,7 +8,7 @@ SC_MODULE(Mul){
     //in/out ports
     sc_in<uint32_t>r1,r2;
     sc_out<uint32_t>ro;
-    sc_out<bool>zero, overflow, underflow, inexact, nan,sign;
+    sc_out<bool>zero, overflow, underflow, inexact, nan,sign ;
 
     //parameters
     uint32_t mantissa_bits;
