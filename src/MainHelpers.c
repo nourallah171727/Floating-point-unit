@@ -42,7 +42,7 @@ void printHelp(){
     printf("This program will be terminated...\n");
 }
 
-uint32_t parse_operand(const char* str) {
+uint32_t parse_operand(const char* str,uint32_t sizeMantissa, uint32_t sizeExponent, uint32_t roundMode) {
     if (str == NULL || strlen(str) == 0) {
         return 0;
     }
@@ -63,18 +63,58 @@ uint32_t parse_operand(const char* str) {
         }
         return value;
     }
-    char* endptr;
-    float fval = strtof(clean, &endptr);
-    if (*endptr != '\0') {
-        fprintf(stderr, "Invalid float operand: %s\n", clean);
-        exit(1);
+    return custom_parse(clean, sizeMantissa, sizeExponent, roundMode);
+}
+uint32_t custom_parse(char* clean , uint32_t sizeMantissa, uint32_t sizeExponent, uint32_t roundMode ){
+    if (strchr(clean,'.')==NULL){
+        char* endptr;
+        uint32_t val = (uint32_t) strtoul(clean, &endptr, 10 );
+        if (*endptr != '\0') {
+            fprintf(stderr, "Invalid integer input: %s\n", clean);
+            exit(1);
+        }
+        return val; //for decimals directly convert into binary form 
     }
-    uint32_t bits;
-    memcpy(&bits, &fval, sizeof(bits));
-    return bits;
+    double value = strtod(clean,NULL);
+    if (value ==0.0){return 0;}
+    uint32_t sign = (value < 0 ) ? 1:0;
+    value= fabs(value);
+    int exponent ; 
+    double normalized = frexp(value, &exponent ); 
+    normalized *= 2.0; 
+    exponent -= 1; 
+    int bias = (1 << (sizeExponent-1))-1; 
+    int biased_exp = exponent +bias ; 
+    if (biased_exp<=0){ return 0;}
+    if (biased_exp >= (1 << sizeExponent) - 1)
+        return (sign << 31) | (((1 << sizeExponent) - 1) << sizeMantissa);  // INF
+
+    double frac = normalized - 1.0;
+    double scaled = frac * (1 << sizeMantissa);
+    uint32_t mantissa = (uint32_t)(scaled);
+
+    double leftover = scaled - mantissa;
+    switch (roundMode) {
+        case 0: if (leftover > 0.5 || (leftover == 0.5 && (mantissa & 1))) mantissa++; break;
+        case 1: if (leftover >= 0.5) mantissa++; break;
+        case 2: break;
+        case 3: if (sign == 0 && leftover > 0.0) mantissa++; break;
+        case 4: if (sign == 1 && leftover > 0.0) mantissa++; break;
+        default: break;
+    }
+
+    if (mantissa >= (1U << sizeMantissa)) {
+        mantissa = 0;
+        biased_exp++;
+        if (biased_exp >= (1 << sizeExponent) - 1)
+            return (sign << 31) | (((1 << sizeExponent) - 1) << sizeMantissa);
+    }
+
+    uint32_t result = (sign << 31) | (biased_exp << sizeMantissa) | mantissa;
+    return result;
 }
 
-struct Request parse_csv_line(char* line) {
+struct Request parse_csv_line(char* line, uint32_t sizeMantissa, uint32_t sizeExponent, uint32_t roundMode) {
     struct Request request = {0};  
     if (line[0] == '\0' || strspn(line, " \t\n\r") == strlen(line)) {
         fprintf(stderr, "Empty or whitespace-only line is not allowed.\n");
@@ -107,44 +147,50 @@ struct Request parse_csv_line(char* line) {
     request.op = (uint8_t)strtoul(field, NULL, 10);  // parse op as decimal int
     field = strtok(NULL, ",");
     if (!field) goto format_error;
-    request.r1 = parse_operand(field);  
+    request.r1 = parse_operand(field, sizeMantissa, sizeExponent, roundMode );  
     field = strtok(NULL, ",");
     if (!field) goto format_error;
-    request.r2 = parse_operand(field);  
+    request.r2 = parse_operand(field, sizeMantissa, sizeExponent, roundMode );  
     field = strtok(NULL, ",");
     if (request.op == 15 && (!field || strlen(field) == 0)) {
         fprintf(stderr, "FMA requires a non-empty r3 operand.\n");
         exit(1); // r1 , r2 and r3 parsing 
     }
-    request.r3 = (field ? parse_operand(field) : 0);  // parse r3 or use 0 if empty
+    request.r3 = (field ? parse_operand(field, sizeMantissa, sizeExponent, roundMode) : 0);  // parse r3 or use 0 if empty
     return request;  // return filled Request struct
 format_error:
     fprintf(stderr, "Malformed CSV line. Expected format: op,r1,r2,r3\n");
     exit(1);
 }
 
-struct Request* load_csv_requests(const char* filename, uint32_t* out_count) {
-    printf("Trying to open: %s\n", filename); // for debug 
-    FILE* file = fopen(filename, "r");  // open file
+struct Request* load_csv_requests(const char* filename,
+                                  uint32_t sizeExponent,
+                                  uint32_t sizeMantissa,
+                                  uint32_t roundMode,
+                                  uint32_t* out_count,
+                                  uint32_t cycles) {
+    printf("Trying to open: %s\n", filename);
+    FILE* file = fopen(filename, "r");
     if (!file) {
-        perror("Error opening CSV file"); // throw error 
+        perror("Error opening CSV file");
         exit(1);
     }
 
-    char line[512];  
-    int capacity = 32;  
-    int count = 0;      
-    struct Request* array = malloc(sizeof(struct Request) * capacity); //allocate mem
+    char line[512];
+    int capacity = 32;
+    int count = 0;
+    struct Request* array = malloc(sizeof(struct Request) * capacity);
 
     int is_first_line = 1;
 
     while (fgets(line, sizeof(line), file)) {
-        if (is_first_line) { 
+        if (is_first_line) {
             is_first_line = 0;
-            if (strncmp(line, "op,r1,r2,r3", strlen("op,r1,r2,r3")) != 0) {
-               fprintf(stderr, "Missing or invalid CSV header. Expected: op,r1,r2,r3\n");
-               exit(1);
-               }
+            line[strcspn(line, "\r\n")] = '\0';  // Remove newline
+            if (strcmp(line, "op,r1,r2,r3") != 0) {
+                fprintf(stderr, "Missing or invalid CSV header. Expected: op,r1,r2,r3\n");
+                exit(1);
+            }
             continue;
         }
 
@@ -153,17 +199,40 @@ struct Request* load_csv_requests(const char* filename, uint32_t* out_count) {
             exit(1);
         }
 
-        if (count >= capacity) {
-            capacity *= 2; 
-            array = realloc(array, sizeof(struct Request) * capacity); // double when needed 
+        struct Request next = parse_csv_line(line, sizeExponent, sizeMantissa, roundMode);
+
+        if (count < cycles) {
+            if (count >= capacity) {
+                capacity *= 2;
+                struct Request* temp = realloc(array, sizeof(struct Request) * capacity);
+                if (!temp) {
+                    free(array);
+                    fprintf(stderr, "Memory allocation failed.\n");
+                    exit(1);
+                }
+                array = temp;
+            }
+            array[count] = next;
         }
 
-        struct Request next = parse_csv_line(line);  
-        array[count++] = next;  
+        count++; 
     }
 
-    fclose(file);  
-    *out_count = count;  
-    return array;  
+    fclose(file);
+
+    if (count > cycles) {
+        printf("Only %u out of %u requests will be simulated due to cycle limit.\n", cycles, count);
+    }
+
+    *out_count = count; 
+    if (count > cycles) {
+        struct Request* trimmed = malloc(sizeof(struct Request) * cycles);
+        memcpy(trimmed, array, sizeof(struct Request) * cycles);
+        free(array);
+        return trimmed;
+    }
+
+    return array;
 }
+
 
