@@ -45,16 +45,15 @@ extern "C" struct Result run_simulation(uint32_t cycles, const char *tracefile,
 
     int i=0;
     while(i<numRequests && i<cycles){
-        struct Request request=requests[i];
-        r1.write(request.r1);
-        r2.write(request.r2);
-        r3.write(request.r3);
-        op.write(request.op);
+        r1.write(requests[i].r1);
+        r2.write(requests[i].r2);
+        r3.write(requests[i].r3);
+        op.write(requests[i].op);
 
         //run a takt
         sc_start(1,SC_SEC);
 
-        request.ro = ro.read();
+        requests[i].ro = ro.read();
 
         if(sign.read()){
             signs++;
@@ -80,7 +79,7 @@ extern "C" struct Result run_simulation(uint32_t cycles, const char *tracefile,
     result.overflows=overflows;
     result.underflows=underflows;
     result.inexacts=inexacts;
-    result.nans=nan;
+    result.nans=nans;
 
     return result;
 }
