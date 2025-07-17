@@ -9,7 +9,7 @@ Mul::Mul(sc_module_name name,uint32_t mantissa_bitsp,uint32_t exponent_bitsp,uin
 {
     bias =(1<<(exponent_bits-1))-1;
     SC_METHOD(exec);
-	sensitive<< r1 << r2;
+	sensitive<< clk.pos();
 }
 
 void Mul::exec(){

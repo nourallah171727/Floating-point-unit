@@ -3,6 +3,7 @@
 using namespace sc_core;
 using namespace sc_dt;
 SC_MODULE(Min) {
+	sc_in<bool> clk;
     sc_in<uint32_t> r1;
     sc_in<uint32_t> r2;
     sc_out<uint32_t> ro;

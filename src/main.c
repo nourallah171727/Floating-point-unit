@@ -4,6 +4,7 @@
 #include <string.h>
 #include <errno.h>
 #include <getopt.h>
+#include <inttypes.h>
 
 #include "../include/MainHelpers.h"
 
@@ -88,8 +89,17 @@ int main(int argc, char* argv[]){
 	struct Result r = run_simulation(
 		cycles, tracefile, sizeExponent, sizeMantissa,
 		roundMode, numRequests, requests);
-	//printf("Simulation results:\n");
-    //printf("Cycles: %u\nSigns: %u\nOverflows: %u\nUnderflows: %u\nInexact: %u\nNaNs: %u\n",
-      // r.cycles, r.signs, r.overflows, r.underflows, r.inexactes, r.nans);
-    return 0;
+
+	printf("Simulation results:\n");
+
+	for(int i=0;i<numRequests;i++){
+	    printf("0x%08" PRIx32 " ", requests[i].ro);
+	}
+
+    printf("\nCycles: %u\nSigns: %u\nOverflows: %u\nUnderflows: %u\nInexact: %u\nNaNs: %u\n",
+      r.cycles, r.signs, r.overflows, r.underflows, r.inexacts, r.nans);
+
+
+
+	return 0;
 }

@@ -7,7 +7,7 @@ using namespace sc_dt;
 Max::Max(sc_module_name name, uint32_t exp_bits, uint32_t man_bits)
     : sc_module(name), exponent_bits(exp_bits), mantissa_bits(man_bits) {
     SC_METHOD(exec);
-    sensitive << r1 << r2; // sensitivite, name and constructor 
+	sensitive<< clk.pos();
 }
 
 void Max::exec() {

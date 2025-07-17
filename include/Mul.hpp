@@ -6,6 +6,7 @@ using namespace sc_core;
 
 SC_MODULE(Mul){
     //in/out ports
+	sc_in<bool> clk;
     sc_in<uint32_t>r1,r2;
     sc_out<uint32_t>ro;
     sc_out<bool>zero, overflow, underflow, inexact, nan,sign ;
