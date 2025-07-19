@@ -41,7 +41,18 @@ void FMA::run()
         sign_product = s2 ^ s3;
         if (is_r1_zero)
         {
-            write_overflow(sign_product);
+            inexact.write(true);
+            // inf based on sign
+            if (sign_product == 1)
+            {
+                ro.write(negative_inf_constant);
+                sign.write(1);
+            }
+            else
+            {
+                ro.write(positive_inf_constant);
+                sign.write(0);
+            }
             return;
         }
         if (is_inf(e1, exponent_bits, m1) && s1 != sign_product)
@@ -51,7 +62,19 @@ void FMA::run()
         }
         else
         {
-            write_overflow(sign_product);
+            inexact.write(true);
+            // inf based on sign
+            if (sign_product == 1)
+            {
+                ro.write(negative_inf_constant);
+                sign.write(1);
+            }
+            else
+            {
+                ro.write(positive_inf_constant);
+                sign.write(0);
+            }
+            return;
         }
         return;
     }
