@@ -17,6 +17,8 @@ void AddSub::exec()
     underflow.write(false);
     inexact.write(false);
     nan.write(false);
+    zero.write(false);
+    sign.write(false);
     extract();
     nan_constant = (((1 << exponent_bits) - 1) << mantissa_bits) + 1;
     positive_inf_constant = ((1 << exponent_bits) - 1) << mantissa_bits;
@@ -34,6 +36,7 @@ void AddSub::exec()
         if (sign_r1 == sign_r2)
         {
             ro.write(r1.read());
+            sign.write(sign_r1);
         }
         else
         {
@@ -45,11 +48,13 @@ void AddSub::exec()
     // one operand is inf , other is normal , then return the inf as it is
     if (is_inf(exponent_r1, exponent_bits, mantissa_r1))
     {
+        sign.write(sign_r1);
         ro.write(r1.read());
         return;
     }
     if (is_inf(exponent_r2, exponent_bits, mantissa_r2))
     {
+        sign.write(sign_r2);
         ro.write(r2.read());
         return;
     }
@@ -58,11 +63,23 @@ void AddSub::exec()
     if (r1.read() == 0 || (r1.read() == (1 << 31)))
     {
         ro.write(r2.read());
+        // check if other operand is 0
+        if ((r2.read() & 0x7FFFFFFF) == 0)
+        {
+            zero.write(true);
+            sign.write(sign_r2);
+        }
         return;
     }
     else if (r2.read() == 0 || (r2.read() == (1 << 31)))
     {
         ro.write(r1.read());
+        // check if other operand is 0
+        if ((r1.read() & 0x7FFFFFFF) == 0)
+        {
+            zero.write(true);
+            sign.write(sign_r1);
+        }
         return;
     }
     if ((op.read().to_uint() == 8 && sign_r1 == sign_r2) || (op.read().to_uint() == 9 && sign_r1 != sign_r2))
@@ -153,12 +170,14 @@ void AddSub::same_sign_add()
             overflow.write(true);
             inexact.write(true);
             ro.write(sign_r1 == 0 ? positive_inf_constant : negative_inf_constant);
+            sign.write(sign_r1);
             return;
         }
     }
     if (!round_mantissa(true, added_mantissas, res_exp, sign_r1, guard, sticky))
     {
         ro.write((sign_r1 << 31) | (res_exp << mantissa_bits) | added_mantissas & (~(1u << mantissa_bits)));
+        sign.write(sign_r1);
     }
 }
 void AddSub::cont_sign_add()
@@ -213,6 +232,7 @@ void AddSub::cont_sign_add()
     subbed_mantissas = bigger_mantissa - mantissa_to_shift;
     if (subbed_mantissas == 0)
     {
+        zero.write(true);
         ro.write(0);
         return;
     }
@@ -232,6 +252,7 @@ void AddSub::cont_sign_add()
     {
         if (subbed_mantissas == 0)
         {
+            zero.write(true);
             ro.write(0);
             return;
         }
@@ -245,6 +266,7 @@ void AddSub::cont_sign_add()
                 underflow.write(true);
                 inexact.write(true);
                 ro.write(0);
+                sign.write(res_sign);
                 return;
             }
             res_exp--;
@@ -253,6 +275,7 @@ void AddSub::cont_sign_add()
         // eliminate 1. leading
         subbed_mantissas &= (~(1u << mantissa_bits));
         ro.write((res_sign << 31) | (res_exp << mantissa_bits) | (subbed_mantissas));
+        sign.write(res_sign);
     }
 }
 
@@ -280,7 +303,7 @@ bool AddSub::is_inf(uint32_t exponent_value, uint32_t exponent_bits, uint32_t ma
 // add is a paramter , when true , means add same sign , when false , cont signs
 // this function rounds mantissa (preserving leading 1.) and changes exp accordingly . returns true when overflow cases already handled
 
-bool AddSub::round_mantissa(bool add_same_sign, uint32_t &mantissa, uint32_t &exp, uint32_t &sign, bool guard, bool sticky)
+bool AddSub::round_mantissa(bool add_same_sign, uint32_t &mantissa, uint32_t &exp, uint32_t &par_sign, bool guard, bool sticky)
 {
     if (guard == 0 && sticky == 0)
     {
@@ -299,9 +322,9 @@ bool AddSub::round_mantissa(bool add_same_sign, uint32_t &mantissa, uint32_t &ex
         if ((is_tie && lsb_is_odd) || more_than_half)
         {
 
-            if (increase_mantissa_by_one(mantissa, exp, sign))
+            if (increase_mantissa_by_one(mantissa, exp, par_sign))
             {
-                ro.write(sign == 0 ? positive_inf_constant : negative_inf_constant);
+
                 return true;
             }
         }
@@ -317,9 +340,8 @@ bool AddSub::round_mantissa(bool add_same_sign, uint32_t &mantissa, uint32_t &ex
         if (is_tie || more_than_half)
         {
 
-            if (increase_mantissa_by_one(mantissa, exp, sign))
+            if (increase_mantissa_by_one(mantissa, exp, par_sign))
             {
-                ro.write(sign == 0 ? positive_inf_constant : negative_inf_constant);
                 return true;
             }
         }
@@ -333,11 +355,10 @@ bool AddSub::round_mantissa(bool add_same_sign, uint32_t &mantissa, uint32_t &ex
     }
     case 3:
     {
-        if (sign == 0)
+        if (par_sign == 0)
         {
-            if (increase_mantissa_by_one(mantissa, exp, sign))
+            if (increase_mantissa_by_one(mantissa, exp, par_sign))
             {
-                ro.write(positive_inf_constant);
                 return true;
             }
         }
@@ -346,11 +367,10 @@ bool AddSub::round_mantissa(bool add_same_sign, uint32_t &mantissa, uint32_t &ex
     }
     case 4:
     {
-        if (sign == 1)
+        if (par_sign == 1)
         {
-            if (increase_mantissa_by_one(mantissa, exp, sign))
+            if (increase_mantissa_by_one(mantissa, exp, par_sign))
             {
-                ro.write(negative_inf_constant);
                 return true;
             }
         }
@@ -362,7 +382,7 @@ bool AddSub::round_mantissa(bool add_same_sign, uint32_t &mantissa, uint32_t &ex
     return false;
 }
 // increases mantissa by one , true when overflow is already handled
-bool AddSub::increase_mantissa_by_one(uint32_t &mantissa, uint32_t &exp, uint32_t sign)
+bool AddSub::increase_mantissa_by_one(uint32_t &mantissa, uint32_t &exp, uint32_t par_sign)
 {
     if (mantissa == ((1u << (mantissa_bits + 1)) - 1))
     {
@@ -375,6 +395,8 @@ bool AddSub::increase_mantissa_by_one(uint32_t &mantissa, uint32_t &exp, uint32_
         {
             overflow.write(true);
             inexact.write(true);
+            ro.write(par_sign == 0 ? positive_inf_constant : negative_inf_constant);
+            sign.write(par_sign);
             return true;
         }
     }

@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "structs.h": "c",
-        "cstdint": "c"
+        "cstdint": "c",
+        "ostream": "cpp"
     }
 }
