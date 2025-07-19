@@ -230,7 +230,7 @@ void AddSub::cont_sign_add()
 
     // final mantissa
     subbed_mantissas = bigger_mantissa - mantissa_to_shift;
-    if (subbed_mantissas == 0)
+    if (subbed_mantissas == 0 && guard == 0 && sticky == 0)
     {
         zero.write(true);
         ro.write(0);
@@ -252,8 +252,10 @@ void AddSub::cont_sign_add()
     {
         if (subbed_mantissas == 0)
         {
+            underflow.write(true);
             zero.write(true);
-            ro.write(0);
+            ro.write(res_sign == 0 ? 0 : 0x80000000);
+            sign.write(res_sign);
             return;
         }
         // bring mantissa to scientific notation , since it can be 0. after substraction
@@ -265,7 +267,7 @@ void AddSub::cont_sign_add()
             {
                 underflow.write(true);
                 inexact.write(true);
-                ro.write(0);
+                ro.write(res_sign == 0 ? 0 : 0x80000000);
                 sign.write(res_sign);
                 return;
             }

@@ -292,7 +292,7 @@ void FMA ::main_funct()
             // if delta is not null , then mantissa_to_shift is already shifted , meaning it's smaller now
             result_mantissa = other_mantissa - mantissa_to_shift;
             // early check for result =0
-            if (result_mantissa == 0)
+            if (result_mantissa == 0 && guard == 0 && sticky == 0)
             {
                 ro.write(0);
                 zero.write(true);
