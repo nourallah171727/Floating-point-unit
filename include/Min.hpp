@@ -11,6 +11,8 @@ SC_MODULE(Min) {
     sc_out<bool> overflow;
     sc_out<bool> underflow;
     sc_out<bool> inexact;
+    sc_out<bool> zero;
+    sc_out<bool> sign
 
     uint32_t mantissa_bits;
     uint32_t exponent_bits;

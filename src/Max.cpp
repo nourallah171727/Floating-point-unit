@@ -65,7 +65,13 @@ void Max::evaluate() {
         return; // both are 0   
          }
 
-    ro.write(compare(val1, val2) >= 0 ? val1 : val2); // calling compare
+    uint32_t result = (compare(val1, val2) >= 0) ? val1 : val2;
+    ro.write(result); //compare call 
+    sign.write((result >> 31) & 1);
+    uint32_t exp_mask = ((1u << exponent_bits) - 1) << mantissa_bits;
+    uint32_t man_mask = (1u << mantissa_bits) - 1;
+    bool is_zero = ((result & exp_mask) == 0) && ((result & man_mask) == 0);
+    zero.write(is_zero); //setting flags 
 }
 
 bool Max::is_nan(uint32_t val) const {

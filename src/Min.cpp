@@ -66,7 +66,13 @@ void Min::evaluate() {
         return;
     }
 
-    ro.write(compare(val1, val2) <= 0 ? val1 : val2); // reversed compare for min
+    uint32_t result = (compare(val1, val2) <= 0) ? val1 : val2;
+    ro.write(result);
+    sign.write((result >> 31) & 1);
+    uint32_t exp_mask = ((1u << exponent_bits) - 1) << mantissa_bits;
+    uint32_t man_mask = (1u << mantissa_bits) - 1;
+    bool is_zero = ((result & exp_mask) == 0) && ((result & man_mask) == 0);
+    zero.write(is_zero);
 }
 
 bool Min::is_nan(uint32_t val) const {
