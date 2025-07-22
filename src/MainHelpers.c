@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <errno.h>
+#include <math.h>
 #include "../include/structs.h"
 #include "../include/MainHelpers.h"
 
@@ -124,12 +125,14 @@ struct Request parse_csv_line(char* line, uint32_t sizeMantissa, uint32_t sizeEx
     strncpy(temp_line, line, sizeof(temp_line) - 1);
     temp_line[sizeof(temp_line) - 1] = '\0';
     char* lookahead = strtok(temp_line, ",");
+
     if (!lookahead) goto format_error;
     uint8_t op = (uint8_t)strtoul(lookahead, NULL, 10); // extracting op as int in a copy line to check later for number of commas 
     if (op != 8 && op != 9 && op != 10 && op != 13 && op != 14 && op != 15) {
         fprintf(stderr, "Unsupported opcode: %d\n", op);
         exit(1);
     }
+
     int comma_count = 0;
     for (char* c = line; *c; c++) {
         if (*c == ',') comma_count++;
@@ -142,7 +145,8 @@ struct Request parse_csv_line(char* line, uint32_t sizeMantissa, uint32_t sizeEx
         fprintf(stderr, "Malformed CSV line (expected at least op,r1,r2): %s\n", line);
         exit(1);
     }
-    char* field = strtok(line, ","); 
+
+    char* field = strtok(line, ",");
     if (!field) goto format_error;
     request.op = (uint8_t)strtoul(field, NULL, 10);  // parse op as decimal int
     field = strtok(NULL, ",");

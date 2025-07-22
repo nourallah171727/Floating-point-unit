@@ -18,7 +18,8 @@ int main(int argc, char* argv[]){
 	//initialising the main program's variables:
 	struct Request* requests;
 
-	uint32_t cycles, sizeExponent, sizeMantissa;
+	uint32_t cycles=-1;
+    uint32_t sizeExponent, sizeMantissa;
 	uint32_t roundMode=0; //defaukt rounding
 	uint32_t numRequests;
 
@@ -99,8 +100,8 @@ int main(int argc, char* argv[]){
 	//printf("inputs: %d %d %d %d %s\n", cycles, sizeExponent, sizeMantissa, roundMode, tracefile);
 
 	//TODO: extract Requests from .csv file + num Requests
-	requests = load_csv_requests(filename, sizeExponent , sizeMantissa ,roundMode, &numRequests, cycles );
-	
+	requests = load_csv_requests(filename, sizeExponent , sizeMantissa ,roundMode, &numRequests, cycles);
+
 
 	//TODO: call run_simulation with all the inputs..
 	struct Result r = run_simulation(
@@ -109,6 +110,7 @@ int main(int argc, char* argv[]){
 
 	printf("Simulation results:\n");
 
+
 	for(int i=0;i<numRequests;i++){
 	    printf("0x%08" PRIx32 " ", requests[i].ro);
 	}
@@ -116,7 +118,8 @@ int main(int argc, char* argv[]){
     printf("\nCycles: %u\nSigns: %u\nOverflows: %u\nUnderflows: %u\nInexact: %u\nNaNs: %u\n",
       r.cycles, r.signs, r.overflows, r.underflows, r.inexacts, r.nans);
 
-
+    //free
+    free(requests);
 
 	return 0;
 }
