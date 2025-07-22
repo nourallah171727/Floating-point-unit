@@ -1,8 +1,5 @@
 #include "../include/Min.hpp"
-#include <systemc>
-#include <cstdint>
-using namespace sc_core;
-using namespace sc_dt;
+
 
  // same logic as max except for one line who is reversed 
 Min::Min(sc_module_name name, uint32_t exp_bits, uint32_t man_bits)

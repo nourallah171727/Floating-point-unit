@@ -36,7 +36,6 @@ project:
 	$(CC)  $(CFLAGS)   -c $(C_SRCS)
 	$(CXX) $(CXXFLAGS) -c $(CPP_SRCS)
 	$(CXX) *.o $(LDFLAGS) -o $(TARGET)
-	rm -f *.o
 
 # Alias for "make"
 all: project
@@ -51,4 +50,5 @@ release:
 
 # Cleanup
 clean:
+	rm *.o
 	rm -f $(TARGET)

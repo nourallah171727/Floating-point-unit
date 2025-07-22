@@ -1,14 +1,11 @@
 #include "../include/AddSub.hpp"
-#include <systemc>
-#include <cstdint>
-using namespace sc_core;
-using namespace sc_dt;
+
 
 AddSub::AddSub(sc_module_name name, uint32_t e_bits, uint32_t m_bits, uint32_t roption)
     : sc_module(name), exponent_bits(e_bits), mantissa_bits(m_bits), rounding_option(roption)
 {
     SC_METHOD(exec);
-    sensitive << r1 << r2;
+	sensitive<< clk.pos();
 }
 
 void AddSub::exec()

@@ -6,6 +6,7 @@ using namespace sc_dt;
 
 SC_MODULE(AddSub)
 {
+	sc_in<bool> clk;
     sc_in<uint32_t> r1;
     sc_in<uint32_t> r2;
     sc_in<sc_bv<4>> op;

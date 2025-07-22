@@ -2,6 +2,7 @@
 #include <cstdint>
 
 using namespace sc_core;
+
 SC_MODULE(FMA)
 {
     uint32_t positive_inf_constant;

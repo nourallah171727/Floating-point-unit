@@ -1,8 +1,4 @@
 #include "FMA.hpp"
-#include <systemc>
-#include <cstdint>
-
-using namespace sc_core;
 
 FMA::FMA(sc_module_name nm, uint32_t mant_bits, uint32_t exp_bits, int rm)
     : sc_module(nm), mantissa_bits(mant_bits), exponent_bits(exp_bits), bias((1 << (exp_bits - 1)) - 1), round_mode(rm)
@@ -155,7 +151,6 @@ bool FMA ::multiplyExact()
     sign_product = s2 ^ s3;
     exponent_product = real_e2 + real_e3;
     mantissa_product = static_cast<uint64_t>(m2) * static_cast<uint64_t>(m3);
-    std::bitset<64> b(mantissa_product);
     // norm tells us if the result we got is actually two digits before the comme (we can have either 1 digit or two before comma)
     bool norm = mantissa_product & (uint64_t(1) << (2 * mantissa_bits + 1));
     if (norm)

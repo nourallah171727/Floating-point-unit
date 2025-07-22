@@ -12,7 +12,7 @@ SC_MODULE(Max) {
     sc_out<bool> underflow;
     sc_out<bool> inexact;
     sc_out<bool> zero;
-    sc_out<bool> sign  // inputs nd outputs
+    sc_out<bool> sign;  // inputs nd outputs
 
     uint32_t mantissa_bits;
     uint32_t exponent_bits; 

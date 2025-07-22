@@ -1,8 +1,4 @@
 #include "../include/Max.hpp"
-#include <systemc>
-#include <cstdint>
-using namespace sc_core;
-using namespace sc_dt;
 
 Max::Max(sc_module_name name, uint32_t exp_bits, uint32_t man_bits)
     : sc_module(name), exponent_bits(exp_bits), mantissa_bits(man_bits) {

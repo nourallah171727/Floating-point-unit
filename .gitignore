@@ -1,0 +1,7 @@
+# ignore C object files
+*.o
+#IDE/project files
+.idea/
+.vscode/
+#Project c executable
+project

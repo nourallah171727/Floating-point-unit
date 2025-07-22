@@ -18,7 +18,8 @@ int main(int argc, char* argv[]){
 	//initialising the main program's variables:
 	struct Request* requests;
 
-	uint32_t cycles, sizeExponent, sizeMantissa, roundMode;
+	uint32_t cycles, sizeExponent, sizeMantissa;
+	uint32_t roundMode=0; //defaukt rounding
 	uint32_t numRequests;
 
 
@@ -50,7 +51,7 @@ int main(int argc, char* argv[]){
 				exit(1);
 
 			}else if(strcmp(optname, "tf")==0){
-				tracefile= optarg;
+				tracefile= optarg; //check is the path is valid
 
 			}else if(strcmp(optname, "cycles")==0){
 				cycles = convert_str_32(optarg);
@@ -78,6 +79,22 @@ int main(int argc, char* argv[]){
 		exit(1);
 	}
 
+	//verify man+exp= 31
+	if(sizeExponent+sizeMantissa!=31){
+		printf("Size Mantissa + Size Exponent should be = 31\n");
+		exit(1);
+	}
+
+	//check mantissa =0 | exp =0
+	if(sizeMantissa==0){
+		printf("Size Mantissa shouldn't be = 0\n");
+		exit(1);
+	}
+
+	if(sizeExponent==0){
+		printf("Size Exponent shouldn't be = 0\n");
+		exit(1);
+	}
 	//Debug
 	//printf("inputs: %d %d %d %d %s\n", cycles, sizeExponent, sizeMantissa, roundMode, tracefile);
 
