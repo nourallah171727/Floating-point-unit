@@ -1,5 +1,3 @@
-SHELL := /bin/bash
-
 # Source files
 C_SRCS   := $(wildcard src/*.c)
 CPP_SRCS := $(wildcard src/*.cpp)
