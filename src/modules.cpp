@@ -1,4 +1,3 @@
-#include <systemc>
 #include "../include/FLOATING_POINT_UNIT.hpp"
 
 extern "C" struct Result run_simulation(uint32_t cycles, const char *tracefile,
@@ -18,8 +17,16 @@ extern "C" struct Result run_simulation(uint32_t cycles, const char *tracefile,
     sc_signal<uint32_t> ro;
     sc_signal<bool> zero,sign,overflow,underflow,inexact,nan;
 
+    //initialize the trace file
+    sc_trace_file* tf = nullptr;
+    if(tracefile){
+        tf = sc_create_vcd_trace_file(tracefile);
+        //As the simulator runs, every time one of those signals changes value,
+        // it writes out an entry tagged with the current simulation timestamp.
+        tf->set_time_unit(1, SC_SEC);
+    }
 
-    //fpu
+    //fpu + bind the signals
     FLOATING_POINT_UNIT fpu("FPU",sizeExponent,sizeMantissa,roundMode);
     fpu.clk(clk);
     fpu.r1(r1);
@@ -35,6 +42,24 @@ extern "C" struct Result run_simulation(uint32_t cycles, const char *tracefile,
     fpu.zero(zero);
     fpu.sign(sign);
 
+
+    //save the signals in the tracefile
+    if(tf){
+        sc_trace(tf,clk,"clk");
+        sc_trace(tf,r1,"r1");
+        sc_trace(tf,r2,"r2");
+        sc_trace(tf,r3,"r3");
+        sc_trace(tf,op,"op");
+        sc_trace(tf,ro,"ro");
+        sc_trace(tf,zero,"zero");
+        sc_trace(tf,sign,"sign");
+        sc_trace(tf,overflow,"overflow");
+        sc_trace(tf,underflow,"underflow");
+        sc_trace(tf,inexact,"inexact");
+        sc_trace(tf,nan,"nan");
+    }
+
+
     //counters for Result
     uint32_t signs=0;
     uint32_t overflows=0;
@@ -42,7 +67,7 @@ extern "C" struct Result run_simulation(uint32_t cycles, const char *tracefile,
     uint32_t inexacts=0;
     uint32_t nans=0;
 
-
+    //OPERATE
     int i=0;
     while(i<numRequests && i<cycles){
         r1.write(requests[i].r1);
@@ -80,6 +105,11 @@ extern "C" struct Result run_simulation(uint32_t cycles, const char *tracefile,
     result.underflows=underflows;
     result.inexacts=inexacts;
     result.nans=nans;
+
+    //close tf
+    if(tf){
+        sc_close_vcd_trace_file(tf);
+    }
 
     return result;
 }

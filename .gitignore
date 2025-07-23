@@ -5,3 +5,5 @@
 .vscode/
 #Project c executable
 project
+#Tracfile
+*.vcd
