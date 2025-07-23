@@ -5,7 +5,7 @@
 #include <errno.h>
 #include <getopt.h>
 #include <inttypes.h>
-
+#include <stdint.h>
 #include "../include/MainHelpers.h"
 
 int main(int argc, char* argv[]){
@@ -18,9 +18,11 @@ int main(int argc, char* argv[]){
 	//initialising the main program's variables:
 	struct Request* requests;
 
-	uint32_t cycles=-1;
-    uint32_t sizeExponent, sizeMantissa;
-	uint32_t roundMode=0; //defaukt rounding
+	//default values
+	uint32_t cycles= UINT32_MAX;
+    uint32_t sizeExponent=8;
+	uint32_t sizeMantissa= 23;
+	uint32_t roundMode=0;
 	uint32_t numRequests;
 
 
@@ -111,7 +113,7 @@ int main(int argc, char* argv[]){
 	printf("Simulation results:\n");
 
 
-	for(int i=0;i<numRequests;i++){
+	for(int i=0;i<r.cycles;i++){
 	    printf("0x%08" PRIx32 " ", requests[i].ro);
 	}
 
