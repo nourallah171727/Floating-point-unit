@@ -4,7 +4,7 @@ FMA::FMA(sc_module_name nm, uint32_t mant_bits, uint32_t exp_bits, int rm)
     : sc_module(nm), mantissa_bits(mant_bits), exponent_bits(exp_bits), bias((1 << (exp_bits - 1)) - 1), round_mode(rm)
 {
     SC_METHOD(run);
-    sensitive << r1 << r2 << r3;
+	sensitive<< clk.pos();
 }
 
 void FMA::run()

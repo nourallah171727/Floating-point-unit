@@ -25,8 +25,8 @@ SC_MODULE(Max) {
     void exec();
     void extract();
     void evaluate();
-    bool is_nan(uint32_t val) const;
-    bool is_inf(uint32_t val) const;
-    uint32_t get_nan() const;
-    int compare(uint32_t a, uint32_t b) const; // methods 
+    bool is_nan(uint32_t val);
+    bool is_inf(uint32_t val);
+    uint32_t get_nan();
+    int compare(uint32_t a, uint32_t b); // methods
 };

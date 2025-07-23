@@ -59,7 +59,7 @@ void Max::evaluate() {
     if (val1 == 0 && val2 == 0) {
         ro.write(0);
         return; // both are 0   
-         }
+    }
 
     uint32_t result = (compare(val1, val2) >= 0) ? val1 : val2;
     ro.write(result); //compare call 
@@ -70,27 +70,27 @@ void Max::evaluate() {
     zero.write(is_zero); //setting flags 
 }
 
-bool Max::is_nan(uint32_t val) const {
+bool Max::is_nan(uint32_t val){
     uint32_t exp = (val >> mantissa_bits) & ((1u << exponent_bits) - 1);
     uint32_t mant = val & ((1u << mantissa_bits) - 1);
     return (exp == ((1u << exponent_bits) - 1)) && (mant != 0); // check if nan 
 }
 
-bool Max::is_inf(uint32_t val) const {
+bool Max::is_inf(uint32_t val){
     uint32_t exp = (val >> mantissa_bits) & ((1u << exponent_bits) - 1);
     uint32_t mant = val & ((1u << mantissa_bits) - 1);
     return (exp == ((1u << exponent_bits) - 1)) && (mant == 0); // check if inf 
 }
 
-uint32_t Max::get_nan() const {
+uint32_t Max::get_nan() {
     return (((1u << exponent_bits) - 1) << mantissa_bits) | 0x1; // nan 
 }
 
-int Max::compare(uint32_t a, uint32_t b) const {
+int Max::compare(uint32_t a, uint32_t b){
     bool sign_a = a >> 31;
     bool sign_b = b >> 31;
     if (sign_a != sign_b)
-        return sign_a ? 1 : -1;
+        return sign_a ? -1 : 1;
     if (a == b) return 0;
     return (sign_a ? a > b : a < b) ? -1 : 1; 
     // if sign are different just compare signs, if not then it depends on the sign 

@@ -6,6 +6,7 @@
 #include "../include/Mul.hpp"
 #include "../include/Max.hpp"
 #include "../include/Min.hpp"
+#include "../include/FMA.hpp"
 
 
 using namespace sc_core;
@@ -29,12 +30,15 @@ SC_MODULE(FLOATING_POINT_UNIT){
     Mul mul;
     Min min_mod;
     Max max_mod;
+	FMA fma;
 
     // Clock-gating signals
     sc_signal<bool> clk_addsub;
     sc_signal<bool> clk_mul;
     sc_signal<bool> clk_min;
     sc_signal<bool> clk_max;
+    sc_signal<bool> clk_fma;
+
 
     // Internal outputs and flags from sub-modules
     sc_signal<uint32_t> ro_addsub;
@@ -69,11 +73,22 @@ SC_MODULE(FLOATING_POINT_UNIT){
     sc_signal<bool> inexact_max;
     sc_signal<bool> nan_max;
 
+    sc_signal<uint32_t> ro_fma;
+    sc_signal<bool> zero_fma;
+    sc_signal<bool> sign_fma;
+    sc_signal<bool> overflow_fma;
+    sc_signal<bool> underflow_fma;
+    sc_signal<bool> inexact_fma;
+    sc_signal<bool> nan_fma;
 
     SC_HAS_PROCESS(FLOATING_POINT_UNIT);
     FLOATING_POINT_UNIT(sc_module_name name, uint32_t e_bits, uint32_t m_bits, uint32_t roption);
 
     void gate_clocks();
     void exec();
+	uint32_t getPositiveInf();
+	uint32_t getNegativeInf();
+	double getMax();
+	double getMin();
 
 };

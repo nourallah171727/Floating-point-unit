@@ -1,13 +1,14 @@
 #include "../include/FLOATING_POINT_UNIT.hpp"
-
-
+#include <cmath>
+#include <stdint.h>
 
 FLOATING_POINT_UNIT::FLOATING_POINT_UNIT(sc_module_name name, uint32_t e_bits, uint32_t m_bits, uint32_t roption)
     : sc_module(name), exponent_bits(e_bits), mantissa_bits(m_bits), round_mode(roption)
     ,addsub("addsub",e_bits,m_bits, roption)
     ,mul("mul",m_bits, e_bits, roption)
     ,min_mod("min_mod",e_bits, m_bits)
-    ,max_mod("max_mod",e_bits, m_bits){
+    ,max_mod("max_mod",e_bits, m_bits)
+	,fma("fma",m_bits, e_bits, roption){
 
         // Clock-gating generator
         SC_METHOD(gate_clocks);
@@ -18,12 +19,14 @@ FLOATING_POINT_UNIT::FLOATING_POINT_UNIT(sc_module_name name, uint32_t e_bits, u
         mul.clk(clk_mul);
         min_mod.clk(clk_min);
         max_mod.clk(clk_max);
+		fma.clk(clk_fma);
 
         // Bind COMMON inputs to all sub-modules
         addsub.r1(r1);addsub.r2(r2);;addsub.op(op);
         mul.r1(r1);mul.r2(r2);
         min_mod.r1(r1);min_mod.r2(r2);
         max_mod.r1(r1);max_mod.r2(r2);
+		fma.r1(r1);fma.r2(r2);fma.r3(r3);
 
         // Bind each sub-module's outputs to internal signals
         addsub.ro(ro_addsub);
@@ -58,6 +61,14 @@ FLOATING_POINT_UNIT::FLOATING_POINT_UNIT(sc_module_name name, uint32_t e_bits, u
         max_mod.inexact(inexact_max);
         max_mod.nan(nan_max);
 
+        fma.ro(ro_fma);
+        fma.zero(zero_fma);
+        fma.sign(sign_fma);
+        fma.overflow(overflow_fma);
+        fma.underflow(underflow_fma);
+        fma.inexact(inexact_fma);
+        fma.nan(nan_fma);
+
         // Use clocked thread for output multiplexer
         SC_METHOD(exec);
            sensitive << op
@@ -68,7 +79,9 @@ FLOATING_POINT_UNIT::FLOATING_POINT_UNIT(sc_module_name name, uint32_t e_bits, u
                      << ro_min << zero_min << sign_min
                      << overflow_min << underflow_min << inexact_min << nan_min
                      << ro_max << zero_max << sign_max
-                     << overflow_max << underflow_max << inexact_max << nan_max;
+                     << overflow_max << underflow_max << inexact_max << nan_max
+					 << ro_fma << zero_fma << sign_fma
+                     << overflow_fma << underflow_fma << inexact_fma << nan_fma;
 }
 
 void FLOATING_POINT_UNIT::gate_clocks(){
@@ -79,6 +92,7 @@ void FLOATING_POINT_UNIT::gate_clocks(){
     clk_mul.write(c && (code == 10));
     clk_min.write(c && (code == 13));
     clk_max.write(c && (code == 14));
+	clk_fma.write(c && (code == 15));
 }
 
 
@@ -120,6 +134,14 @@ void FLOATING_POINT_UNIT::exec(){
        underflow.write(underflow_max.read());
        inexact.write(inexact_max.read());
        nan.write(nan_max.read());
+     }else if(code == 15){
+       ro.write(ro_fma.read());
+       zero.write(zero_fma.read());
+       sign.write(sign_fma.read());
+       overflow.write(overflow_fma.read());
+       underflow.write(underflow_fma.read());
+       inexact.write(inexact_fma.read());
+       nan.write(nan_fma.read());
      }else{
        ro.write(0);
        zero.write(false);
@@ -129,7 +151,24 @@ void FLOATING_POINT_UNIT::exec(){
        inexact.write(false);
        nan.write(false);
     }
+}
 
+uint32_t FLOATING_POINT_UNIT::getPositiveInf(){
+	return (((1U<<exponent_bits)-1)<<mantissa_bits);
+}
+
+uint32_t FLOATING_POINT_UNIT::getNegativeInf(){
+    return (1U <<(exponent_bits + mantissa_bits))|(((1U << exponent_bits)-1) << mantissa_bits);
+}
+
+double FLOATING_POINT_UNIT::getMax(){
+    uint32_t exponentMax = (1 << (exponent_bits -1))- 1;      // max exponent value
+    double mantissaMax = 2.0 - std::pow(2.0, -mantissa_bits); //alle Mantissa bits auf 1 +1
+	return mantissaMax* std::pow(2.0, exponentMax);
+}
+
+double FLOATING_POINT_UNIT::getMin(){
+    return -getMax();
 }
 
 

@@ -7,7 +7,9 @@ SC_MODULE(FMA)
 {
     uint32_t positive_inf_constant;
     uint32_t negative_inf_constant;
-    sc_in<uint32_t> r1, r2, r3;
+
+	sc_in<bool> clk;
+	sc_in<uint32_t> r1, r2, r3;
     sc_out<uint32_t> ro;
     sc_out<bool> zero, sign, overflow, underflow, inexact, nan;
 

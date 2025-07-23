@@ -72,27 +72,27 @@ void Min::evaluate() {
     zero.write(is_zero);
 }
 
-bool Min::is_nan(uint32_t val) const {
+bool Min::is_nan(uint32_t val) {
     uint32_t exp = (val >> mantissa_bits) & ((1u << exponent_bits) - 1);
     uint32_t mant = val & ((1u << mantissa_bits) - 1);
     return (exp == ((1u << exponent_bits) - 1)) && (mant != 0);
 }
 
-bool Min::is_inf(uint32_t val) const {
+bool Min::is_inf(uint32_t val) {
     uint32_t exp = (val >> mantissa_bits) & ((1u << exponent_bits) - 1);
     uint32_t mant = val & ((1u << mantissa_bits) - 1);
     return (exp == ((1u << exponent_bits) - 1)) && (mant == 0);
 }
 
-uint32_t Min::get_nan() const {
+uint32_t Min::get_nan() {
     return (((1u << exponent_bits) - 1) << mantissa_bits) | 0x1;
 }
 
-int Min::compare(uint32_t a, uint32_t b) const {
+int Min::compare(uint32_t a, uint32_t b) {
     bool sign_a = a >> 31;
     bool sign_b = b >> 31;
     if (sign_a != sign_b)
-        return sign_a ? 1 : -1;
+        return sign_a ? -1 : 1;
     if (a == b) return 0;
     return (sign_a ? a > b : a < b) ? -1 : 1;
 }
