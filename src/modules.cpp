@@ -21,9 +21,6 @@ extern "C" struct Result run_simulation(uint32_t cycles, const char *tracefile,
     sc_trace_file* tf = nullptr;
     if(tracefile){
         tf = sc_create_vcd_trace_file(tracefile);
-        //As the simulator runs, every time one of those signals changes value,
-        // it writes out an entry tagged with the current simulation timestamp.
-        tf->set_time_unit(1, SC_SEC);
     }
 
     //fpu + bind the signals

@@ -53,15 +53,19 @@ uint32_t parse_operand(const char *str, uint32_t sizeMantissa, uint32_t sizeExpo
     {
         return 0;
     }
-    char clean[64];
+	char clean[64];
     strncpy(clean, str, sizeof(clean) - 1);
     clean[strcspn(clean, "\r\n")] = '\0';
-    clean[sizeof(clean) - 1] = '\0';
-    int len = strlen(clean);
-    if (len > 0 && (clean[len - 1] == '\n' || clean[len - 1] == '\r'))
-    {
-        clean[len - 1] = '\0';
+
+    char nospace[64];
+    char *dst = nospace;
+    for (char *src = clean; *src; ++src) {
+      if (*src != ' ' && *src != '\t') {
+        *dst++ = *src;
+      }
     }
+    *dst = '\0';
+    strncpy(clean, nospace, sizeof(clean));
     if (strncmp(clean, "0x", 2) == 0 || strncmp(clean, "0X", 2) == 0)
     {
         char *endptr;
@@ -75,6 +79,7 @@ uint32_t parse_operand(const char *str, uint32_t sizeMantissa, uint32_t sizeExpo
     }
     return custom_parse(clean, sizeMantissa, sizeExponent, roundMode);
 }
+
 uint32_t custom_parse(char *clean, uint32_t sizeMantissa, uint32_t sizeExponent, uint32_t roundMode)
 {
     if (strchr(clean, '.') == NULL)

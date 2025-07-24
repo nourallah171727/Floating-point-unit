@@ -185,7 +185,7 @@ int main(int argc, char *argv[])
 	// printf("inputs: %d %d %d %d %s\n", cycles, sizeExponent, sizeMantissa, roundMode, tracefile);
 
 	// TODO: extract Requests from .csv file + num Requests
-	requests = load_csv_requests(filename, sizeExponent, sizeMantissa, roundMode, &numRequests, cycles);
+	requests = load_csv_requests(filename, sizeMantissa,sizeExponent, roundMode, &numRequests, cycles);
 
 	// TODO: call run_simulation with all the inputs..
 	struct Result r = run_simulation(
