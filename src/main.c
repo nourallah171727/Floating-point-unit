@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
 	uint32_t roundMode = 0; // default rounding
 	uint32_t numRequests;
 
-	const char *tracefile;
+	const char *tracefile = NULL;
 
 	// Getting Input with getopt_long:
 	int opt;
