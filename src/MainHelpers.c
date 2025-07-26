@@ -55,18 +55,18 @@ uint32_t parse_operand(const char *str, uint32_t sizeMantissa, uint32_t sizeExpo
     }
 	char clean[64];
     strncpy(clean, str, sizeof(clean) - 1);
-    clean[strcspn(clean, "\r\n")] = '\0';
+    clean[strcspn(clean, "\r\n")] = '\0'; // use clean version instead of the actual string 
 
     char nospace[64];
     char *dst = nospace;
     for (char *src = clean; *src; ++src) {
       if (*src != ' ' && *src != '\t') {
         *dst++ = *src;
-      }
+      } // cleaning spaces ( not required just an added option )
     }
     *dst = '\0';
     strncpy(clean, nospace, sizeof(clean));
-    if (strncmp(clean, "0x", 2) == 0 || strncmp(clean, "0X", 2) == 0)
+    if (strncmp(clean, "0x", 2) == 0 || strncmp(clean, "0X", 2) == 0) // checking for hexa and then return it as it is 
     {
         char *endptr;
         uint32_t value = strtoul(clean, &endptr, 16);
@@ -77,7 +77,7 @@ uint32_t parse_operand(const char *str, uint32_t sizeMantissa, uint32_t sizeExpo
         }
         return value;
     }
-    return custom_parse(clean, sizeMantissa, sizeExponent, roundMode);
+    return custom_parse(clean, sizeMantissa, sizeExponent, roundMode); // only for floats and ints 
 }
 
 uint32_t custom_parse(char *clean, uint32_t sizeMantissa, uint32_t sizeExponent, uint32_t roundMode)
@@ -94,21 +94,21 @@ uint32_t custom_parse(char *clean, uint32_t sizeMantissa, uint32_t sizeExponent,
         return val; // for decimals directly convert into binary form
     }
     double value = strtod(clean, NULL);
-    if (value == 0.0)
+    if (value == 0.0) //zero stays zero 
     {
         return 0;
     }
     uint32_t sign = (value < 0) ? 1 : 0;
-    value = fabs(value);
+    value = fabs(value); // work only with positiv val and store sign bit 
     int exponent;
     double normalized = frexp(value, &exponent);
     normalized *= 2.0;
     exponent -= 1;
     int bias = (1 << (sizeExponent - 1)) - 1;
-    int biased_exp = exponent + bias;
+    int biased_exp = exponent + bias; // adding bias to the exponent
     if (biased_exp <= 0)
     {
-        return 0;
+        return 0; // too small 
     }
     if (biased_exp >= (1 << sizeExponent) - 1)
         return (sign << 31) | (((1 << sizeExponent) - 1) << sizeMantissa); // INF
@@ -118,9 +118,9 @@ uint32_t custom_parse(char *clean, uint32_t sizeMantissa, uint32_t sizeExponent,
     uint32_t mantissa = (uint32_t)(scaled);
 
     double leftover = scaled - mantissa;
-    switch (roundMode)
+    switch (roundMode) // rounding 
     {
-    case 0:
+    case 0: 
         if (leftover > 0.5 || (leftover == 0.5 && (mantissa & 1)))
             mantissa++;
         break;
@@ -142,7 +142,7 @@ uint32_t custom_parse(char *clean, uint32_t sizeMantissa, uint32_t sizeExponent,
         break;
     }
 
-    if (mantissa >= (1U << sizeMantissa))
+    if (mantissa >= (1U << sizeMantissa)) // handling overflows 
     {
         mantissa = 0;
         biased_exp++;
@@ -150,7 +150,7 @@ uint32_t custom_parse(char *clean, uint32_t sizeMantissa, uint32_t sizeExponent,
             return (sign << 31) | (((1 << sizeExponent) - 1) << sizeMantissa);
     }
 
-    uint32_t result = (sign << 31) | (biased_exp << sizeMantissa) | mantissa;
+    uint32_t result = (sign << 31) | (biased_exp << sizeMantissa) | mantissa; // final composition 
     return result;
 }
 
@@ -159,7 +159,7 @@ struct Request parse_csv_line(char *line, uint32_t sizeMantissa, uint32_t sizeEx
     struct Request request = {0};
     if (line[0] == '\0' || strspn(line, " \t\n\r") == strlen(line))
     {
-        fprintf(stderr, "Empty or whitespace-only line is not allowed.\n");
+        fprintf(stderr, "Empty or whitespace-only line is not allowed.\n"); // optional 
         exit(1);
     }
     char temp_line[512];
@@ -187,8 +187,8 @@ struct Request parse_csv_line(char *line, uint32_t sizeMantissa, uint32_t sizeEx
         fprintf(stderr, "Malformed CSV line (FMA must have at least 4 fields): %s\n", line);
         exit(1);
     }
-    if (op != 15 && comma_count < 2)
-    {
+    if (op != 15 && comma_count < 2) // if not enough commas bzw fields 
+    { 
         fprintf(stderr, "Malformed CSV line (expected at least op,r1,r2): %s\n", line);
         exit(1);
     }
@@ -248,7 +248,7 @@ struct Request *load_csv_requests(const char *filename,
             line[strcspn(line, "\r\n")] = '\0'; // Remove newline
             if (strcmp(line, "op,r1,r2,r3") != 0)
             {
-                fprintf(stderr, "Missing or invalid CSV header. Expected: op,r1,r2,r3\n");
+                fprintf(stderr, "Missing or invalid CSV header. Expected: op,r1,r2,r3\n"); // checking if it matches the first line of the example 
                 exit(1);
             }
             continue;
@@ -260,14 +260,14 @@ struct Request *load_csv_requests(const char *filename,
             exit(1);
         }
 
-        struct Request next = parse_csv_line(line, sizeExponent, sizeMantissa, roundMode);
+        struct Request next = parse_csv_line(line, sizeExponent, sizeMantissa, roundMode); // the actual parsing starting from second line 
 
         if (count < cycles)
         {
             if (count >= capacity)
             {
-                capacity *= 2;
-                struct Request *temp = realloc(array, sizeof(struct Request) * capacity);
+                capacity *= 2; // make room for more entries if we run out of space in the arraay 
+                struct Request *temp = realloc(array, sizeof(struct Request) * capacity); //memory management
                 if (!temp)
                 {
                     free(array);
@@ -276,7 +276,7 @@ struct Request *load_csv_requests(const char *filename,
                 }
                 array = temp;
             }
-            array[count] = next;
+            array[count] = next; //storing next request 
         }
 
         count++;
@@ -290,10 +290,10 @@ struct Request *load_csv_requests(const char *filename,
         *out_count = cycles;
         struct Request *trimmed = malloc(sizeof(struct Request) * cycles);
         memcpy(trimmed, array, sizeof(struct Request) * cycles);
-        free(array);
+        free(array); //free original array to avoid leak 
         return trimmed;
     }
-    else
+    else // no trimming 
     {
         *out_count = count;
     }
