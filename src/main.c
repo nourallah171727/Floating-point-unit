@@ -48,66 +48,70 @@ int main(int argc, char *argv[])
 	bool user_set_exponent = false;
 	bool user_set_mantissa = false;
 
-	while((opt = getopt_long(argc, argv, "", long_options, &option_index)) != -1)
+	while ((opt = getopt_long(argc, argv, "", long_options, &option_index)) != -1)
 	{
-		if(opt==0)
+		if (opt == 0)
 		{
 			const char *optname = long_options[option_index].name;
 
-			if(strcmp(optname, "help") == 0)
+			if (strcmp(optname, "help") == 0)
 			{
 				printHelp();
 				exit(0);
 			}
-			else if(strcmp(optname, "tf") == 0)
+			else if (strcmp(optname, "tf") == 0)
 			{
-                if(!optarg || optarg[0] == '\0' || optarg[0] == '-'){
-                    printf("Error: no Tracefile name provided\n");
-                    exit(1);
-                }
+				if (!optarg || optarg[0] == '\0' || optarg[0] == '-')
+				{
+					printf("Error: no Tracefile name provided\n");
+					exit(1);
+				}
 				tracefile = optarg;
-
 			}
-			else if(strcmp(optname, "cycles") == 0)
+			else if (strcmp(optname, "cycles") == 0)
 			{
-                char *s = optarg;
-                if(!s[0] || s[0] == '-') {
-                    printf("Error: --cycles requires an argument\n");
-                    exit(1);
-                }
+				char *s = optarg;
+				if (!s[0] || s[0] == '-')
+				{
+					printf("Error: --cycles requires an argument\n");
+					exit(1);
+				}
 				cycles = convert_str_32(optarg);
 			}
-			else if(strcmp(optname, "size-exponent") == 0)
+			else if (strcmp(optname, "size-exponent") == 0)
 			{
-               char *s = optarg;
-                if(!s[0] || s[0] == '-') {
-                    printf("Error: --size-exponent requires an argument\n");
-                    exit(1);
-                }
+				char *s = optarg;
+				if (!s[0] || s[0] == '-')
+				{
+					printf("Error: --size-exponent requires an argument\n");
+					exit(1);
+				}
 				sizeExponent = convert_str_8(optarg);
 				user_set_exponent = true;
 			}
-			else if(strcmp(optname, "size-mantissa") == 0)
+			else if (strcmp(optname, "size-mantissa") == 0)
 			{
-               char *s = optarg;
-                if(!s[0] || s[0] == '-') {
-                    printf("Error: --size-mantissa requires an argument\n");
-                    exit(1);
-                }
+				char *s = optarg;
+				if (!s[0] || s[0] == '-')
+				{
+					printf("Error: --size-mantissa requires an argument\n");
+					exit(1);
+				}
 				sizeMantissa = convert_str_8(optarg);
 				user_set_mantissa = true;
 			}
-			else if(strcmp(optname, "round-mode") == 0)
+			else if (strcmp(optname, "round-mode") == 0)
 			{
-               char *s = optarg;
-                if(!s[0] || s[0] == '-') {
-                    printf("Error: --round-mode requires an argument\n");
-                    exit(1);
-                }
+				char *s = optarg;
+				if (!s[0] || s[0] == '-')
+				{
+					printf("Error: --round-mode requires an argument\n");
+					exit(1);
+				}
 				roundMode = convert_str_8(optarg);
 			}
 		}
-		else if(opt == '?')
+		else if (opt == '?')
 		{
 			// Unknown/invalid option
 			fprintf(stderr, "Unknown or invalid option. Use --help for usage.\n");
@@ -115,25 +119,25 @@ int main(int argc, char *argv[])
 		}
 	}
 	// Now resolve logic after parsing:
-	if(user_set_exponent && !user_set_mantissa)
+	if (user_set_exponent && !user_set_mantissa)
 	{
-		if(sizeExponent == 0 || sizeExponent >= 31)
+		if (sizeExponent == 0 || sizeExponent >= 31)
 		{
 			fprintf(stderr, "Exponent must be between 1 and 30.\n");
 			exit(1);
 		}
 		sizeMantissa = 31 - sizeExponent;
 	}
-	else if(!user_set_exponent && user_set_mantissa)
+	else if (!user_set_exponent && user_set_mantissa)
 	{
-		if(sizeMantissa == 0 || sizeMantissa >= 31)
+		if (sizeMantissa == 0 || sizeMantissa >= 31)
 		{
 			fprintf(stderr, "Mantissa must be between 1 and 30.\n");
 			exit(1);
 		}
 		sizeExponent = 31 - sizeMantissa;
 	}
-	else if(!user_set_exponent && !user_set_mantissa)
+	else if (!user_set_exponent && !user_set_mantissa)
 	{
 		// Both defaults: sizeExponent=8, sizeMantissa=23
 		sizeExponent = 8;
@@ -142,27 +146,25 @@ int main(int argc, char *argv[])
 	else
 	{
 		// Both are set: check validity
-		if(sizeExponent + sizeMantissa != 31)
+		if (sizeExponent + sizeMantissa != 31)
 		{
 			fprintf(stderr, "Size Mantissa + Size Exponent should be = 31\n");
 			exit(1);
 		}
-		if(sizeExponent == 0 || sizeMantissa == 0)
+		if (sizeExponent == 0 || sizeMantissa == 0)
 		{
 			fprintf(stderr, "Exponent and mantissa must not be 0.\n");
 			exit(1);
 		}
 	}
-	printf("exponent bits are %u\n", sizeExponent);
-	printf("exponent bits are %u\n", sizeMantissa);
 
 	// Get .csv file:
-	if(optind >= argc)
+	if (optind >= argc)
 	{
 		printf("Missing .csv file argument\n");
 		exit(1);
 	}
-	if(optind + 1 < argc)
+	if (optind + 1 < argc)
 	{
 		fprintf(stderr, "Error: Unexpected extra arguments after input file: ");
 		for (int i = optind + 1; i < argc; ++i)
@@ -185,7 +187,7 @@ int main(int argc, char *argv[])
 	// printf("inputs: %d %d %d %d %s\n", cycles, sizeExponent, sizeMantissa, roundMode, tracefile);
 
 	// TODO: extract Requests from .csv file + num Requests
-	requests = load_csv_requests(filename, sizeMantissa,sizeExponent, roundMode, &numRequests, cycles);
+	requests = load_csv_requests(filename, sizeMantissa, sizeExponent, roundMode, &numRequests, cycles);
 
 	// TODO: call run_simulation with all the inputs..
 	struct Result r = run_simulation(

@@ -1,11 +1,10 @@
 #include "../include/AddSub.hpp"
 
-
 AddSub::AddSub(sc_module_name name, uint32_t e_bits, uint32_t m_bits, uint32_t roption)
     : sc_module(name), exponent_bits(e_bits), mantissa_bits(m_bits), rounding_option(roption)
 {
     SC_METHOD(exec);
-	sensitive<< clk.pos();
+    sensitive << clk.pos();
 }
 
 void AddSub::exec()
@@ -231,6 +230,7 @@ void AddSub::cont_sign_add()
     {
         zero.write(true);
         ro.write(0);
+        sign.write(0);
         return;
     }
     if (!(guard == 0 && sticky == 0))
