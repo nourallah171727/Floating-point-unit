@@ -15,6 +15,7 @@ Max ≈ 3.4028235 · 10^38,
 Min ≈ −3.4028235 · 10^38
 
 Verteilung von Aufgaben :
+
 Saifeddine Guenanna:
 
 Load_csv_requests:
@@ -33,7 +34,7 @@ Das Min-Modul ist ein SystemC-Modul zur Bestimmung des Minimums zweier Fließkom
 Bei zwei NaN- oder INF-Werten wird der kleinere zurückgegeben. Bei INF und einer normalen Zahl wird die normale Zahl zurückgegeben. Bei NaN und einer gültigen Zahl wird die gültige Zahl gewählt.
 Der Vergleichsalgorithmus: Zuerst Vorzeichenvergleich, bei gleichem Vorzeichen direkter Bit-Vergleich.
 
-NourAllah Gargouri
+Nourallah Gargouri:
 
 AddSub:
 Subtraktion wird durch Umformung in eine Addition gelöst: A−B=A+(−B).
@@ -74,14 +75,21 @@ Wird verwendet, um Kommandozeilenargumente bequem auszuwerten. Unterstützt Lang
 Dienen zur Erzeugung von VCD-Dateien, mit denen das zeitliche Verhalten der Signale in GTKWave analysiert werden kann. So lassen sich Werteänderungen in Modulen nachvollziehen und das Verhalten des Designs systematisch überprüfen.
 
 -FPU:
+
 Jedes SystemC-Submodul (Min, Max, AddSub, Mul, FMA) besitzt eine eigene Clock-Leitung (z. B. clk_min, clk_max). Anstatt alle Module gleichzeitig aktiv zu halten und das Ergebnis später anhand des 4-Bit-Opcode auszuwählen, wird nur der Takt des benötigten Moduls aktiviert. Die übrigen Module bleiben inaktiv – das spart Energie und reduziert den Ressourcenverbrauch.
 
 -Mul: 
+
 Es gibt 5 Hauptschritte um die Multiplikation von 2 floating Point Zahlen zu bestimmen:
+
 1- Das Exponent des Ergebnisses temporär auf e1+e2 setzen
+
 2- Multiplikation der Mantissen nach dem Hinzufügen der Leading 1
+
 3- Das Exponent anpassen anhand dessen + Rounding falls nötig
+
 4- Das Sign bestimmen (einfach sign(a) XOR sign(b)) 
+
 5- Alles zusammensetzen und das Ergebnis finden
 
 
