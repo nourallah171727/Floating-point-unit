@@ -1,4 +1,4 @@
-# Floating-Point Unit & FMA (Grad Project 04)
+# Floating-Point Unit & FMA
 
 ## Project overview
 This project implements a configurable SystemC floating-point unit (FPU) that supports add, subtract, multiply, minimum, maximum, and fused multiply-add (FMA) operations with IEEE 754-style behavior. Each operation is selected via a 4-bit opcode and produces status flags for zero, sign, overflow, underflow, inexact, and NaN conditions as part of every cycle-driven computation.【F:assignment.txt†L200-L373】 The module is designed as a set of cooperating submodules (e.g., FMA) to match the assignment’s specification and can be embedded into a TinyRISC-like CPU as an extension for floating-point arithmetic.【F:assignment.txt†L320-L374】【F:assignment.txt†L670-L686】
