@@ -11,7 +11,7 @@ This project implements a configurable SystemC floating-point unit (FPU) that su
 **under slides.pdf you can see exactly how each operation is implemented**
 
 ## Team contributions
-- **Nourallah Gargouri:** Built the `AddSub` unit (including shift-align and normalize logic), the fused multiply-add data path with guard/sticky propagation and rounding, and CLI-based user input validation.
+- **Nourallah Gargouri:** Built the `AddSub` unit (which executes both addition abd subtraction), the fused multiply-add unit with guard/sticky propagation and rounding, and CLI-based user input validation.
 - **Saifeddine Guenanna:** Implemented CSV loading and conversion into requests honoring custom exponent/mantissa sizes and round modes, plus the SystemC `Max` and `Min` comparator modules handling NaN/INF edge cases with bitwise comparisons.
 - **Ahmed Amine Loukil:** Developed command-line parsing with `getopt_long`, VCD trace generation, the top-level FPU clock-gating strategy to activate only needed submodules, and the floating-point multiplier pipeline covering exponent adjustment, sign handling, and rounding.
 
