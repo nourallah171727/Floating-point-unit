@@ -34,7 +34,13 @@ Use the CLI to configure the FPU and feed a CSV of requests:
 - `<file>`: CSV input describing the queued requests (see below).
 - `--help`: print option documentation and exit.
 
-Each option is validated for range and file accessibility; invalid arguments halt execution with a descriptive error. Tracing, when enabled, records the important signals for inspection in tools like GTKWave.【F:assignment.txt†L769-L781】 The primary simulation entry point initializes the FPU with the selected parameters and returns per-flag statistics (cycles, sign events, overflows, underflows, inexact results, NaNs).【F:assignment.txt†L796-L865】
+Each option is validated for range and file accessibility; invalid arguments halt execution with a descriptive error. Tracing, when enabled, records the important signals for inspection in tools like GTKWave. The primary simulation entry point initializes the FPU with the selected parameters and returns per-flag statistics (cycles, sign events, overflows, underflows, inexact results, NaNs).
+### Example CLI invocation
+Run a short simulation with standard single-precision sizes, nearest-even rounding, a 200-cycle budget, and a CSV of queued requests:
+
+```bash
+./project --size-exponent 8 --size-mantissa 23 --round-mode 0 --cycles 200 --tf trace.vcd input.csv
+```
 
 ## CSV input format
 Provide a headered CSV file where each row specifies an operation and operands to execute sequentially:
