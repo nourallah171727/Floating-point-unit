@@ -1,13 +1,13 @@
 # Floating-Point Unit & FMA
 
 ## Project overview
-This project implements a configurable SystemC floating-point unit (FPU) that supports add, subtract, multiply, minimum, maximum, and fused multiply-add (FMA) operations with IEEE 754-style behavior. Each operation is selected via a 4-bit opcode and produces status flags for zero, sign, overflow, underflow, inexact, and NaN conditions as part of every cycle-driven computation.【F:assignment.txt†L200-L373】 The module is designed as a set of cooperating submodules (e.g., FMA) to match the assignment’s specification and can be embedded into a TinyRISC-like CPU as an extension for floating-point arithmetic.【F:assignment.txt†L320-L374】【F:assignment.txt†L670-L686】
+This project implements a configurable SystemC floating-point unit (FPU) that supports add, subtract, multiply, minimum, maximum, and fused multiply-add (FMA) operations with IEEE 754-style behavior. Each operation is selected via a 4-bit opcode and produces status flags for zero, sign, overflow, underflow, inexact, and NaN conditions as part of every cycle-driven computation. The module is designed as a set of cooperating submodules (e.g., FMA) to match the assignment’s specification and can be embedded into a TinyRISC-like CPU as an extension for floating-point arithmetic.
 
 ## Assignment highlights
-- **Required operations:** FADD (8), FSUB (9), FMUL (10), FMIN (13), FMAX (14), and FMA (15), with operands `r1`, `r2`, `r3` and result `ro` sourced from module inputs each clock cycle.【F:assignment.txt†L200-L318】 The FMA path performs multiplication and addition without intermediate rounding to maintain accuracy.【F:assignment.txt†L320-L331】
-- **Status flags:** Operations must set zero, sign, overflow, underflow, inexact, and NaN flags based on the computed result range and validity.【F:assignment.txt†L332-L373】
-- **Rounding modes:** Five rounding strategies are supported—nearest even (0), nearest away from zero (1), toward zero (2), toward +INF (3), and toward -INF (4).【F:assignment.txt†L520-L550】 Results exceeding representable range round to INF; subnormal magnitudes round to zero.【F:assignment.txt†L503-L515】
-- **Floating-point format:** The design follows IEEE 754 single-precision structure with configurable exponent and mantissa sizes, handling normalization, special values (±INF, NaN), and edge cases like INF±INF and NaN propagation.【F:assignment.txt†L374-L515】 Optional helper methods expose constants and extrema for the configured format.【F:assignment.txt†L551-L604i】
+- **Required operations:** FADD (8), FSUB (9), FMUL (10), FMIN (13), FMAX (14), and FMA (15), with operands `r1`, `r2`, `r3` and result `ro` sourced from module inputs each clock cycle. The FMA path performs multiplication and addition without intermediate rounding to maintain accuracy.
+- **Status flags:** Operations must set zero, sign, overflow, underflow, inexact, and NaN flags based on the computed result range and validity.
+- **Rounding modes:** Five rounding strategies are supported—nearest even (0), nearest away from zero (1), toward zero (2), toward +INF (3), and toward -INF (4). Results exceeding representable range round to INF; subnormal magnitudes round to zero.
+- **Floating-point format:** The design follows IEEE 754 single-precision structure with configurable exponent and mantissa sizes, handling normalization, special values (±INF, NaN), and edge cases like INF±INF and NaN propagation.Optional helper methods expose constants and extrema for the configured format.
 **under slides.pdf you can see exactly how each operation is implemented**
 
 ## Team contributions
@@ -46,6 +46,6 @@ op,r1,r2,r3
 15,0.001,2.395,0x13
 ```
 
-- The first column selects the opcode (decimal). Remaining columns supply operands as floats, hexadecimal, or 32-bit integers (interpreted as float bit patterns).【F:assignment.txt†L920-L990】 Unused operands may be left blank.
+- The first column selects the opcode (decimal). Remaining columns supply operands as floats, hexadecimal, or 32-bit integers (interpreted as float bit patterns). Unused operands may be left blank.
 - Files **must** include the header row and use commas as separators; nonconforming files are rejected with an error.
 
