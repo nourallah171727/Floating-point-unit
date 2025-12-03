@@ -8,7 +8,7 @@ This project implements a configurable SystemC floating-point unit (FPU) that su
 - **Status flags:** Operations must set zero, sign, overflow, underflow, inexact, and NaN flags based on the computed result range and validity.
 - **Rounding modes:** Five rounding strategies are supported—nearest even (0), nearest away from zero (1), toward zero (2), toward +INF (3), and toward -INF (4). Results exceeding representable range round to INF; subnormal magnitudes round to zero.
 - **Floating-point format:** The design follows IEEE 754 single-precision structure with configurable exponent and mantissa sizes, handling normalization, special values (±INF, NaN), and edge cases like INF±INF and NaN propagation.Optional helper methods expose constants and extrema for the configured format.
-**under slides.pdf you can see exactly how each operation is implemented**
+**our team provides slides.pdf, so you can see exactly how each operation is implemented**
 
 ## Team contributions
 - **Nourallah Gargouri:** Built the `AddSub` unit (which executes both addition abd subtraction), the fused multiply-add unit with guard/sticky propagation and rounding, and CLI-based user input validation.
