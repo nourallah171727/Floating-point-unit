@@ -27,12 +27,12 @@ make project
 ## Running simulations
 Use the CLI to configure the FPU and feed a CSV of requests:
 
-- `--size-exponent <uint8>` / `--size-mantissa <uint8>`: bit widths for exponent and mantissa (sum must fit in 32 bits).【F:assignment.txt†L627-L665】
-- `--round-mode <uint8>`: rounding policy (0–4 as listed above).【F:assignment.txt†L520-L550】【F:assignment.txt†L647-L655】
-- `--cycles <uint32>`: number of simulation cycles to process.【F:assignment.txt†L727-L734】
-- `--tf <path>`: emit a trace file capturing key signals (omit to skip tracing).【F:assignment.txt†L735-L781】
-- `<file>`: CSV input describing the queued requests (see below).【F:assignment.txt†L742-L760】
-- `--help`: print option documentation and exit.【F:assignment.txt†L748-L756】
+- `--size-exponent <uint8>` / `--size-mantissa <uint8>`: bit widths for exponent and mantissa (sum must fit in 32 bits).
+- `--round-mode <uint8>`: rounding policy (0–4 as listed above).
+- `--cycles <uint32>`: number of simulation cycles to process.
+- `--tf <path>`: emit a trace file capturing key signals (omit to skip tracing).
+- `<file>`: CSV input describing the queued requests (see below).
+- `--help`: print option documentation and exit.
 
 Each option is validated for range and file accessibility; invalid arguments halt execution with a descriptive error. Tracing, when enabled, records the important signals for inspection in tools like GTKWave.【F:assignment.txt†L769-L781】 The primary simulation entry point initializes the FPU with the selected parameters and returns per-flag statistics (cycles, sign events, overflows, underflows, inexact results, NaNs).【F:assignment.txt†L796-L865】
 
