@@ -1,96 +1,51 @@
-Literaturrecherche:
+# Floating-Point Unit & FMA (Grad Project 04)
 
-Die Fused Multiply-Add Operation (FMA) ist zentral für moderne Prozessorarchitekturen, besonders bei Gleitkommaberechnungen. Sie kombiniert Multiplikation und Addition in einem Schritt ohne Zwischenrundung und verbessert dadurch Genauigkeit und Performance.
-Im Bereich des maschinellen Lernens ist FMA besonders wichtig, z. B. bei Matrixmultiplikationen und gewichteten Summen. FMA reduziert Rundungsfehler und beschleunigt Berechnungen. NVIDIA integrierte FMA erstmals in den Tensor Cores der Volta-Architektur (Tesla V100), was gegenüber der Pascal-Architektur (Tesla P100) einen deutlichen Leistungssprung brachte.
-FMA findet außerdem Anwendung in physikalischen Simulationen, Rendering und wissenschaftlicher Datenverarbeitung, wo numerische Stabilität wichtig ist.
-Unser System orientiert sich an IEEE-754 mit konfigurierbarer Exponenten- und Mantissagröße. Diese Flexibilität erlaubt optimierte Nutzung der Bitbreite, z. B. bei eingebetteten Systemen.
+## Project overview
+This project implements a configurable SystemC floating-point unit (FPU) that supports add, subtract, multiply, minimum, maximum, and fused multiply-add (FMA) operations with IEEE 754-style behavior. Each operation is selected via a 4-bit opcode and produces status flags for zero, sign, overflow, underflow, inexact, and NaN conditions as part of every cycle-driven computation.【F:assignment.txt†L200-L373】 The module is designed as a set of cooperating submodules (e.g., FMA) to match the assignment’s specification and can be embedded into a TinyRISC-like CPU as an extension for floating-point arithmetic.【F:assignment.txt†L320-L374】【F:assignment.txt†L670-L686】
 
-Zur Berechnung der Maximalzahl wird das Vorzeichenbit auf 0 gesetzt, alle Bits des Exponenten auf 1 (außer Sonderfall Inf/NaN), und alle Bits der Mantisse auf 1. Daraus ergibt sich:
-Max = (2 − 2^(-m)) · 2^(2^(e−1)−1)
-mit e als Exponentenbits und m als Mantissabits. Die Mantisse entspricht 2 − 2^(-m) wegen der impliziten führenden 1 im IEEE-754-Format.
-Die Minimalzahl ergibt sich durch Setzen des Vorzeichenbits auf 1:
-Min = −Max
-Beispiel: Bei ExpSize = 8 und ManSize = 23 gilt:
-Max ≈ 3.4028235 · 10^38,
-Min ≈ −3.4028235 · 10^38
+## Assignment highlights
+- **Required operations:** FADD (8), FSUB (9), FMUL (10), FMIN (13), FMAX (14), and FMA (15), with operands `r1`, `r2`, `r3` and result `ro` sourced from module inputs each clock cycle.【F:assignment.txt†L200-L318】 The FMA path performs multiplication and addition without intermediate rounding to maintain accuracy.【F:assignment.txt†L320-L331】
+- **Status flags:** Operations must set zero, sign, overflow, underflow, inexact, and NaN flags based on the computed result range and validity.【F:assignment.txt†L332-L373】
+- **Rounding modes:** Five rounding strategies are supported—nearest even (0), nearest away from zero (1), toward zero (2), toward +INF (3), and toward -INF (4).【F:assignment.txt†L520-L550】 Results exceeding representable range round to INF; subnormal magnitudes round to zero.【F:assignment.txt†L503-L515】
+- **Floating-point format:** The design follows IEEE 754 single-precision structure with configurable exponent and mantissa sizes, handling normalization, special values (±INF, NaN), and edge cases like INF±INF and NaN propagation.【F:assignment.txt†L374-L515】 Optional helper methods expose constants and extrema for the configured format.【F:assignment.txt†L551-L604i】
+**under slides.pdf you can see exactly how each operation is implemented**
 
-Verteilung von Aufgaben :
+## Team contributions
+- **Nourallah Gargouri:** Built the `AddSub` unit (including shift-align and normalize logic), the fused multiply-add data path with guard/sticky propagation and rounding, and CLI-based user input validation.
+- **Saifeddine Guenanna:** Implemented CSV loading and conversion into requests honoring custom exponent/mantissa sizes and round modes, plus the SystemC `Max` and `Min` comparator modules handling NaN/INF edge cases with bitwise comparisons.
+- **Ahmed Amine Loukil:** Developed command-line parsing with `getopt_long`, VCD trace generation, the top-level FPU clock-gating strategy to activate only needed submodules, and the floating-point multiplier pipeline covering exponent adjustment, sign handling, and rounding.
 
-Saifeddine Guenanna:
+## Repository layout & build
+The repository contains the expected artifacts for the assignment: a `Makefile` that builds an executable named `project`, a `build.sh` wrapper script, presentation slides (`slides.pdf`), source code under `src/`, headers under `include/`, and optional tests under `test/`.【F:assignment.txt†L61-L126】 Run either helper to build the SystemC design:
 
-Load_csv_requests:
-Diese Funktion erhält den Pfad zur Eingabedatei sowie Parameter für Exponentgröße, Mantissagröße, Rundungsmodus, die maximale Anzahl an Simulationszyklen und einen Zeiger auf den Ausgabewert für die Anzahl der geladenen Requests.
-Sie liest eine CSV-Datei zeilenweise ein, parst jede Zeile und wandelt die Operanden abhängig von der gegebenen Mantissa- und Exponentgröße ins entsprechende IEEE-754-Format um.
-Die Anzahl der Requests darf die maximale Anzahl an Zyklen nicht überschreiten.
-Besonders hervorzuheben ist die effiziente Speicherverwaltung sowie die präzise Umwandlung von Fließkommazahlen (auch bei nicht-standardisierten Mantissa-/Exponentgrößen). Die Funktion verwendet Helper-Methoden aus MainHelpers.
+```bash
+make project
+# or
+./build.sh
+```
 
-Max Modul:
-Das Max-Modul ist ein SystemC-Modul zur Bestimmung des Maximums zweier Fließkommazahlen im konfigurierbaren IEEE-754-Format.
-Bei zwei NaN- oder INF-Werten wird der größere zurückgegeben. Bei INF und einer normalen Zahl wird INF zurückgegeben. Bei NaN und einer gültigen Zahl wird die Zahl gewählt.
-Der Vergleichsalgorithmus: Zuerst werden die Vorzeichenbits ausgewertet. Bei gleichem Vorzeichen erfolgt ein direkter Bit-Vergleich.
+## Running simulations
+Use the CLI to configure the FPU and feed a CSV of requests:
 
-Min Modul:
-Das Min-Modul ist ein SystemC-Modul zur Bestimmung des Minimums zweier Fließkommazahlen im konfigurierbaren IEEE-754-Format.
-Bei zwei NaN- oder INF-Werten wird der kleinere zurückgegeben. Bei INF und einer normalen Zahl wird die normale Zahl zurückgegeben. Bei NaN und einer gültigen Zahl wird die gültige Zahl gewählt.
-Der Vergleichsalgorithmus: Zuerst Vorzeichenvergleich, bei gleichem Vorzeichen direkter Bit-Vergleich.
+- `--size-exponent <uint8>` / `--size-mantissa <uint8>`: bit widths for exponent and mantissa (sum must fit in 32 bits).【F:assignment.txt†L627-L665】
+- `--round-mode <uint8>`: rounding policy (0–4 as listed above).【F:assignment.txt†L520-L550】【F:assignment.txt†L647-L655】
+- `--cycles <uint32>`: number of simulation cycles to process.【F:assignment.txt†L727-L734】
+- `--tf <path>`: emit a trace file capturing key signals (omit to skip tracing).【F:assignment.txt†L735-L781】
+- `<file>`: CSV input describing the queued requests (see below).【F:assignment.txt†L742-L760】
+- `--help`: print option documentation and exit.【F:assignment.txt†L748-L756】
 
-Nourallah Gargouri:
+Each option is validated for range and file accessibility; invalid arguments halt execution with a descriptive error. Tracing, when enabled, records the important signals for inspection in tools like GTKWave.【F:assignment.txt†L769-L781】 The primary simulation entry point initializes the FPU with the selected parameters and returns per-flag statistics (cycles, sign events, overflows, underflows, inexact results, NaNs).【F:assignment.txt†L796-L865】
 
-AddSub:
-Subtraktion wird durch Umformung in eine Addition gelöst: A−B=A+(−B).
-Die Schritte sind:
-Mantisse der kleineren Zahl shiften, bis Exponenten gleich sind, G/S-Bits setzen.
-Je nach Vorzeichen werden Mantissen addiert oder subtrahiert.
-Normalisierung und ggf. Rundung.
+## CSV input format
+Provide a headered CSV file where each row specifies an operation and operands to execute sequentially:
 
-FMA:
-Multiplikation von 1.m2 und 1.m3, Addition der Exponenten.
-1.m1 in eine 64-Bit-kompatible Form bringen.
-Mantisse shiften, G/S-Bits setzen.
-Vorzeichen bestimmen.
-Mantissen addieren oder subtrahieren.
-G/S-Bits propagieren.
-Finales Vorzeichen, Exponent und Ergebnis in 32 Bit zusammensetzen.
-Runden.
+```
+op,r1,r2,r3
+9,0x00000011,0x10001011,
+13,0x00000001,32949138,11112
+15,0.001,2.395,0x13
+```
 
-Nutzer-Input-Testing:
-Basierend auf dem CLI-Code von Ahmed Amin und Saif wurde pattern-basiertes Testing umgesetzt:
-Maximal 13 Argumente
-Nur Long Options mit getopt
-Validierung aller Optionen
-Prüfung auf gültige .csv-Datei
-
-
-
-Ahmed Amine Loukil:
-
-
-
--getopt_long:
-Wird verwendet, um Kommandozeilenargumente bequem auszuwerten. Unterstützt Langoptionen
-(--A),die sind :[--help,--tf,--size-mantissa,--size-exponent,--cycles,--round-mode]
-
--Tracefiles:
-
-Dienen zur Erzeugung von VCD-Dateien, mit denen das zeitliche Verhalten der Signale in GTKWave analysiert werden kann. So lassen sich Werteänderungen in Modulen nachvollziehen und das Verhalten des Designs systematisch überprüfen.
-
--FPU:
-
-Jedes SystemC-Submodul (Min, Max, AddSub, Mul, FMA) besitzt eine eigene Clock-Leitung (z. B. clk_min, clk_max). Anstatt alle Module gleichzeitig aktiv zu halten und das Ergebnis später anhand des 4-Bit-Opcode auszuwählen, wird nur der Takt des benötigten Moduls aktiviert. Die übrigen Module bleiben inaktiv – das spart Energie und reduziert den Ressourcenverbrauch.
-
--Mul: 
-
-Es gibt 5 Hauptschritte um die Multiplikation von 2 floating Point Zahlen zu bestimmen:
-
-1- Das Exponent des Ergebnisses temporär auf e1+e2 setzen
-
-2- Multiplikation der Mantissen nach dem Hinzufügen der Leading 1
-
-3- Das Exponent anpassen anhand dessen + Rounding falls nötig
-
-4- Das Sign bestimmen (einfach sign(a) XOR sign(b)) 
-
-5- Alles zusammensetzen und das Ergebnis finden
-
-
+- The first column selects the opcode (decimal). Remaining columns supply operands as floats, hexadecimal, or 32-bit integers (interpreted as float bit patterns).【F:assignment.txt†L920-L990】 Unused operands may be left blank.
+- Files **must** include the header row and use commas as separators; nonconforming files are rejected with an error.
 
